@@ -6,22 +6,21 @@ import os
 from google.cloud import vision
 
 class AI_Player(object):
-    def __init__(self, index, round_count):
+    def __init__(self, index):
         """
         init the AI player object
         :param index: int
         :param round_count: int
         """
         self.index = index
-        self.round_count = round_count
 
-    def sketch(self, word):
+    def sketch(self, word, round_count):
         """
         make a sketch from the word
         :param word: str
         :return: str (file path)
         """
-        img = Get_image_from_google(word, 1, self.index, self.round_count).get_images()
+        img = Get_image_from_google(word, 1, self.index, round_count).get_images()
         return img[0]
 
     def guess(self, sketch):

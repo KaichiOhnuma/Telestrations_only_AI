@@ -30,7 +30,7 @@ class Get_image_from_google(object):
         
         for i in range(1, self.n+1):
             try:
-                self.driver.find_element_by_xpath('//*[@id="islrg"]/div[1]/div['+str(i)+']/a[1]/div[1]/img').screenshot("C:\\Users\\kaich\\Documents\\research\\program\\Telestrations\\client\\images\\"+str(self.index)+"-"+str(i)+".png")
+                self.driver.find_element_by_xpath('//*[@id="islrg"]/div[1]/div['+str(i)+']/a[1]/div[1]/img').screenshot("C:\\Users\\kaich\\Documents\\research\\program\\Telestrations\\client\\images\\"+str(self.index)+"-"+str(self.round_count)+"-"+str(i)+".png")
                 self.images.append("C:\\Users\\kaich\\Documents\\research\\program\\Telestrations\\client\\images\\"+str(self.index)+"-"+str(self.round_count)+"-"+str(i)+".png")
             except:
                 print("error")
