@@ -16,10 +16,19 @@ class Game_by_AI_player(object):
         self.players = [AI_Player(i) for i in range(self.player_num)]
         self.sketch_books = [[] for _ in range(self.player_num)]
         self.make_secret_word()
+        self.play_game()
+    
+    def play_game(self):
+        """
+        play one game
+        :return: None
+        """
 
         while self.round_count < self.player_num:
             self.round_count += 1
             self.round()
+
+        self.round_count = 0
             
         
     def make_secret_word(self):
@@ -40,9 +49,13 @@ class Game_by_AI_player(object):
 
         for i in range(self.player_num):
             sketch_book_index = (i + self.round_count -1) % self.player_num
+
+            # sketch turn
             if self.round_count % 2 == 1:
                 sketch = self.players[i].sketch(self.sketch_books[sketch_book_index][self.round_count-1], self.round_count)
                 self.sketch_books[sketch_book_index].append(sketch)
+            
+            # guess turn
             else:
                 guess = self.players[i].guess(self.sketch_books[sketch_book_index][self.round_count-1])
                 self.sketch_books[sketch_book_index].append(guess)
