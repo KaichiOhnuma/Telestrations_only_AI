@@ -36,10 +36,10 @@ class Game_by_AI_player(object):
         make a secret word for each player
         :return: None
         """
-        self.sketch_books[0].append("punching bag")
-        self.sketch_books[1].append("fruit cake")
-        self.sketch_books[2].append("wizard")
-        self.sketch_books[3].append("aquarium")
+        self.sketch_books[0].append("kidney beans")
+        self.sketch_books[1].append("subway")
+        self.sketch_books[2].append("softball")
+        self.sketch_books[3].append("air bag")
 
     def round(self):
         """
@@ -48,17 +48,17 @@ class Game_by_AI_player(object):
         """
 
         for i in range(self.player_num):
-            sketch_book_index = (i + self.round_count -1) % self.player_num
+            sketch_book_idx = (i + self.round_count -1) % self.player_num
 
             # sketch turn
             if self.round_count % 2 == 1:
-                sketch = self.players[i].sketch(self.sketch_books[sketch_book_index][self.round_count-1], self.round_count)
-                self.sketch_books[sketch_book_index].append(sketch)
+                sketch = self.players[i].sketch(self.sketch_books[sketch_book_idx][self.round_count-1], self.round_count)
+                self.sketch_books[sketch_book_idx].append(sketch)
             
             # guess turn
             else:
-                guess = self.players[i].guess(self.sketch_books[sketch_book_index][self.round_count-1])
-                self.sketch_books[sketch_book_index].append(guess)
+                guess = self.players[i].guess(self.sketch_books[sketch_book_idx][self.round_count-1])
+                self.sketch_books[sketch_book_idx].append(guess)
 
     def draw(self):
         """

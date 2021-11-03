@@ -3,7 +3,7 @@ import cv2
 class Compare_img(object):
     def __init__(self, imgs):
         self.imgs = imgs
-        self.img_size = (400,400)
+        self.img_size = (200,200)
 
     def compare_hist_match(self):
         self.avg_hist_match = [0 for _ in range(len(self.imgs))]
@@ -39,11 +39,15 @@ class Compare_img(object):
                     img2 = cv2.imread(img2, cv2.IMREAD_GRAYSCALE)
                     img2 = cv2.resize(img2, self.img_size)
                     (img2_kp, img2_des) = detector.detectAndCompute(img2, None)
-
-                    matches = bf.match(img1_des, img2_des)
-                    dist = [m.distance for m in matches]
-                    result = sum(dist) / len(dist)
-                    self.avg_feature_distance[i] += result / (len(self.imgs)-1)
+                    
+                    try:
+                        matches = bf.match(img1_des, img2_des)
+                        dist = [m.distance for m in matches]
+                        result = sum(dist) / len(dist)
+                        self.avg_feature_distance[i] += result / (len(self.imgs)-1)
+                    except:
+                        self.imgs.pop(j)
+                        self.avg_feature_distance.pop(j)
 
         return self.avg_feature_distance
 
@@ -64,8 +68,8 @@ class Compare_img(object):
 # test
 if __name__ == '__main__':
     imgs = []
-    for i in range(10):
-        imgs.append('C:\\Users\\kaich\\Documents\\research\\program\\Telestrations\\ai\\images\\0-0-'+str(i)+'.png')
+    for i in range(9):
+        imgs.append('C:/Users/kaich/Documents/research/program/Telestrations/ai/images/2-3-'+str(i)+'.png')
     test = Compare_img(imgs)
     img_idx = test.get_most_similar_img_idx()
     print(img_idx)

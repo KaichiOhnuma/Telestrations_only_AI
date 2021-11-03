@@ -1,7 +1,7 @@
 """
 Represents a AI player object on the client side
 """
-from get_image_from_google import Get_img_from_google
+from download_img import Download_img
 from compare_img import Compare_img
 import os
 from google.cloud import vision
@@ -21,8 +21,9 @@ class AI_Player(object):
         :param word: str
         :return: str (file path)
         """
-        imgs = Get_img_from_google(word, 9, self.index, round_count).get_images()
+        imgs = Download_img(word, 9, self.index, round_count).get_imgs()
         img_idx = Compare_img(imgs).get_most_similar_img_idx()
+        print('sketch by player {} at round {}'.format(self.index, round_count))
         return imgs[img_idx]
 
     def guess(self, sketch):
