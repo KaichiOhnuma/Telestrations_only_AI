@@ -21,7 +21,7 @@ class AI_Player(object):
         :param word: str
         :return: str (file path)
         """
-        imgs = Download_img(word, 9, self.index, round_count).get_imgs()
+        imgs = Download_img(word, 10, self.index, round_count).get_imgs()
         img_idx = Compare_img(imgs).get_most_similar_img_idx()
         print('sketch by player {} at round {}'.format(self.index, round_count))
         return imgs[img_idx]
