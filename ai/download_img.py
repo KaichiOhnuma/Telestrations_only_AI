@@ -20,7 +20,9 @@ class Download_img(object):
         self.player_idx = player_idx
         self.round_count = round_count
         self.imgs = []
-        self.download()
+
+        while len(self.imgs) == 0:
+            self.download()
 
     def download(self):
         """
@@ -29,7 +31,7 @@ class Download_img(object):
         """
         page = 'https://www.bing.com/images/search'
         headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0"}
-        params = {'q': self.word, 'hl': 'en', 'form': 'HDRSC2', 'first': '1', 'scenario': 'ImageBasicHover'}
+        params = {'q': self.word, 'mkt': 'en-US', 'form': 'HDRSC2', 'first': '1', 'scenario': 'ImageBasicHover'}
 
         response = requests.get(page, headers=headers,  params=params)
         soup = BeautifulSoup(response.text, "lxml")
