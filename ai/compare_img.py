@@ -1,11 +1,23 @@
+"""
+Represents the object of image compare function
+""" 
+
 import cv2
 
 class Compare_img(object):
     def __init__(self, imgs):
+        """
+        init the object of the img compare function
+        :param imgs: [int]
+        """
         self.imgs = imgs
         self.img_size = (200,200)
 
     def compare_hist_match(self):
+        """
+        compare image(s) with hist match
+        :return: [int] (average hist match)
+        """
         self.avg_hist_match = [0 for _ in range(len(self.imgs))]
 
         for i, img1 in enumerate(self.imgs):
@@ -25,33 +37,49 @@ class Compare_img(object):
         return self.avg_hist_match  
 
     def feature_detection(self):
+        """
+        compare image(s) with feature detection
+        :return: [int] (average feature distance)
+        """
         self.avg_feature_distance = [0 for _ in range(len(self.imgs))]
-        bf = cv2.BFMatcher(cv2.NORM_HAMMING)
+        bf = cv2.BFMatcher(cv2.NORM_L2)
         detector = cv2.AKAZE_create()
 
         for i, img1 in enumerate(self.imgs):
+            remove_idx_list = []
+
             img1 = cv2.imread(img1, cv2.IMREAD_GRAYSCALE)
             img1 = cv2.resize(img1, self.img_size)
             (img1_kp, img1_des) = detector.detectAndCompute(img1, None)
 
             for j, img2 in enumerate(self.imgs):
                 if i != j:
+                    result = 0
+
                     img2 = cv2.imread(img2, cv2.IMREAD_GRAYSCALE)
                     img2 = cv2.resize(img2, self.img_size)
                     (img2_kp, img2_des) = detector.detectAndCompute(img2, None)
                     
                     try:
                         matches = bf.match(img1_des, img2_des)
-                        dist = [m.distance for m in matches]
-                        result = sum(dist) / len(dist)
-                        self.avg_feature_distance[i] += result / (len(self.imgs)-1)
                     except:
-                        self.imgs.pop(j)
-                        self.avg_feature_distance.pop(j)
+                        remove_idx_list.append(j)
 
+                    dist = [match.distance for match in matches]
+                    result = sum(dist) / len(dist)
+                    self.avg_feature_distance[i] += result
+                
+            for remove_idx in reversed(remove_idx_list):
+                self.imgs.pop(remove_idx)
+                self.avg_feature_distance.pop(remove_idx)
+                
         return self.avg_feature_distance
 
     def get_most_similar_img_idx(self):
+        """
+        get the most similar image index
+        :return: int
+        """
         compare = self.feature_detection()
         min = compare[0]
         img_idx = 0
@@ -69,8 +97,9 @@ class Compare_img(object):
 if __name__ == '__main__':
     imgs = []
     for i in range(9):
-        imgs.append('C:/Users/kaich/Documents/research/program/Telestrations/ai/images/2-3-'+str(i)+'.png')
+        imgs.append('C:/Users/kaich/Documents/research/program/Telestrations/ai/images/1-1-'+str(i)+'.png')
     test = Compare_img(imgs)
     img_idx = test.get_most_similar_img_idx()
     print(img_idx)
+    print(test.imgs[img_idx])
     print(test.avg_feature_distance)
