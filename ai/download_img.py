@@ -7,7 +7,7 @@ import requests
 import json
 
 class Download_img(object):
-    def __init__(self, word, n, player_idx, round_count, label_idx=None):
+    def __init__(self, word, n, player_idx, round_count):
         """
         init the img(s) download object
         :param word: str
@@ -19,12 +19,8 @@ class Download_img(object):
         self.n = n
         self.player_idx = player_idx
         self.round_count = round_count
-        self.label_idx = label_idx
         self.imgs = []
-
-        while len(self.imgs) == 0:
-            self.download()
-            self.n += 1
+        self.download()
 
     def download(self):
         """
@@ -33,7 +29,7 @@ class Download_img(object):
         """
         page = 'https://www.bing.com/images/search'
         headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0"}
-        params = {'q': self.word, 'mkt': 'en-US' ,'form': 'HDRSC2', 'first': '1', 'scenario': 'ImageBasicHover'}
+        params = {'q': self.word, 'hl': 'en', 'form': 'HDRSC2', 'first': '1', 'scenario': 'ImageBasicHover'}
 
         response = requests.get(page, headers=headers,  params=params)
         soup = BeautifulSoup(response.text, "lxml")
@@ -45,10 +41,7 @@ class Download_img(object):
             img_link = json_data['murl']
             res = requests.get(img_link, stream=True)
             if res.status_code == 200:
-                if self.round_count % 2 == 0:
-                    img_file = 'C:/Users/kaich/Documents/research/program/Telestrations/ai/images/'+str(self.player_idx)+'-'+str(self.round_count)+'-'+str(self.label_idx)+'.png'
-                else:
-                    img_file = 'C:/Users/kaich/Documents/research/program/Telestrations/ai/images/'+str(self.player_idx)+'-'+str(self.round_count)+'-'+str(i)+'.png'
+                img_file = 'C:/Users/kaich/Documents/research/program/Telestrations/ai/images/'+str(self.player_idx)+'-'+str(self.round_count)+'-'+str(i)+'.png'
                 with open(img_file, 'wb') as f:
                     f.write(res.content)
                     self.imgs.append(img_file)
@@ -64,5 +57,5 @@ class Download_img(object):
 
 # test
 if __name__ == '__main__':
-    test = Download_img('table', 1, 0, 1).get_imgs()
+    test = Download_img('kidney beans', 10, 0, 0).get_imgs()
     print(test)
