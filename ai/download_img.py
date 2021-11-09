@@ -23,6 +23,8 @@ class Download_img(object):
 
         while len(self.imgs) == 0:
             self.download()
+            if len(self.imgs) == 0:
+                self.n += 1
 
     def download(self):
         """
@@ -39,15 +41,16 @@ class Download_img(object):
 
         for i in range(self.n):
             data = data_list[i]
-            json_data = json.loads(data.get('m'))
-            img_link = json_data['murl']
-            res = requests.get(img_link, stream=True)
-            if res.status_code == 200:
-                img_file = 'C:/Users/kaich/Documents/research/program/Telestrations/ai/images/'+str(self.player_idx)+'-'+str(self.round_count)+'-'+str(i)+'.png'
-                with open(img_file, 'wb') as f:
-                    f.write(res.content)
-                    self.imgs.append(img_file)
-            else:
+            try:
+                json_data = json.loads(data.get('m'))
+                img_link = json_data['murl']
+                res = requests.get(img_link, stream=True, timeout=(6.0, 10.0))
+                if res.status_code == 200:
+                    img_file = 'C:/Users/kaich/Documents/research/program/Telestrations/ai/images/'+str(self.player_idx)+'-'+str(self.round_count)+'-'+str(i)+'.png'
+                    with open(img_file, 'wb') as f:
+                        f.write(res.content)
+                        self.imgs.append(img_file)
+            except:
                 print("download is failed")
 
     def get_imgs(self):
@@ -59,5 +62,5 @@ class Download_img(object):
 
 # test
 if __name__ == '__main__':
-    test = Download_img('kidney beans', 10, 0, 0).get_imgs()
+    test = Download_img('Ball', 10, 0, 3).get_imgs()
     print(test)

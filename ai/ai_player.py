@@ -21,10 +21,12 @@ class AI_Player(object):
         :param word: str
         :return: str (file path)
         """
+        print('----------sketch by player {} at round {}----------'.format(self.index, round_count))
+
         imgs = Download_img(word, 10, self.index, round_count).get_imgs()
-        img_idx = Compare_img(imgs).get_most_similar_img_idx()
-        print('sketch by player {} at round {}'.format(self.index, round_count))
-        return imgs[img_idx]
+        result = Compare_img().get_most_similar_img(imgs)
+        print("__________{}__________".format(result))
+        return result
 
     def guess(self, sketch, round_count):
         """
@@ -32,7 +34,8 @@ class AI_Player(object):
         :param sketch: str (file path)
         :return: str
         """
-        label_imgs = []
+        print('----------guess by player {} at round {}----------'.format(self.index, round_count))
+        compare_results = []
 
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'C:\\Users\\kaich\\Documents\\research\\program\\telestrations-project-395eec6b87fc.json'
         client = vision.ImageAnnotatorClient()
@@ -43,20 +46,17 @@ class AI_Player(object):
         labels = response.label_annotations
 
         for i, label in enumerate(labels):
-            try:
-                label_img = Download_img(label.description, 10, self.index, round_count, i).get_imgs()
-                label_img_idx = Compare_img(label_img)
-                print("{}-{}".format(label.description, label_img[label_img_idx]))
-                label_imgs.append(label_img[label_img_idx])
-            except:
-                pass
-        
-        result = labels[Compare_img(label_imgs).get_most_similar_img_idx()].description
-        print('guess by player {} at round {}'.format(self.index, round_count))
+            label_img_list = Download_img(label.description, 1, self.index, round_count).get_imgs()
+            label_img = Compare_img().get_most_similar_img(label_img_list)
+            compare_results.append(Compare_img().feature_detection(sketch, label_img))
+
+        result_idx = compare_results.index(min(compare_results))
+        result = labels[result_idx].description
+
+        print("__________{}__________".format(result))
         return result
 
 # test
 if __name__ == '__main__':
     test = AI_Player(0)
-    #print(test.sketch('table', 1))
-    print(test.guess('C:/Users/kaich/Documents/research/program/Telestrations/ai/images/0-1-5.png', 0))
+    print(test.guess('C:/Users/kaich/Documents/research/program/Telestrations/ai/images/0-1-0.png', 2))

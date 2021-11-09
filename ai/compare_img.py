@@ -5,101 +5,95 @@ Represents the object of image compare function
 import cv2
 
 class Compare_img(object):
-    def __init__(self, imgs):
+    def __init__(self):
         """
         init the object of the img compare function
-        :param imgs: [int]
         """
-        self.imgs = imgs
         self.img_size = (200,200)
 
-    def compare_hist_match(self):
+    def compare_hist_match(self, target_img, comparing_img):
         """
-        compare image(s) with hist match
-        :return: [int] (average hist match)
+        compare image by hist match
+        :param target_img: str (file path)
+        :param comparing_img: str (file path)
+        :return: float
         """
-        self.avg_hist_match = [0 for _ in range(len(self.imgs))]
+        target_img = cv2.imread(target_img)
+        target_img = cv2.resize(target_img, self.img_size)
+        target_img_hist = cv2.calcHist([target_img], [0], None, [256], [0,256])
 
-        for i, img1 in enumerate(self.imgs):
-            img1 = cv2.imread(img1)
-            img1 = cv2.resize(img1, self.img_size)
-            img1_hist = cv2.calcHist([img1], [0], None, [256], [0,256])
+        comparing_img = cv2.imread(comparing_img)
+        comparing_img = cv2.resize(comparing_img, self.img_size)
+        comparing_img_hist = cv2.calcHist([comparing_img], [0], None, [256], [0,256])
 
-            for j, img2 in enumerate(self.imgs):
-                if i != j:
-                    img2 = cv2.imread(img2)
-                    img2 = cv2.resize(img2, self.img_size)
-                    img2_hist = cv2.calcHist([img2], [0], None, [256], [0,256])
+        result = cv2.compareHist(target_img_hist, comparing_img_hist, 0)
 
-                    result = cv2.compareHist(img1_hist, img2_hist, 0)
-                    self.avg_hist_match[i] += result / (len(self.imgs)-1)
+        return result 
 
-        return self.avg_hist_match  
-
-    def feature_detection(self):
+    def feature_detection(self, target_img, comparing_img):
         """
-        compare image(s) with feature detection
-        :return: [int] (average feature distance)
+        compare image by feature detection
+        :param target_img: str (file path)
+        :param comparing_img: str (file path)
+        :return: float
         """
-        self.avg_feature_distance = [0 for _ in range(len(self.imgs))]
         bf = cv2.BFMatcher(cv2.NORM_L2)
         detector = cv2.AKAZE_create()
 
-        for i, img1 in enumerate(self.imgs):
-            remove_idx_list = []
+        try:
+            target_img = cv2.imread(target_img, cv2.IMREAD_GRAYSCALE)
+            target_img = cv2.resize(target_img, self.img_size)
+            (target_img_kp, target_img_des) = detector.detectAndCompute(target_img, None)
 
-            img1 = cv2.imread(img1, cv2.IMREAD_GRAYSCALE)
-            img1 = cv2.resize(img1, self.img_size)
-            (img1_kp, img1_des) = detector.detectAndCompute(img1, None)
+            comparing_img = cv2.imread(comparing_img, cv2.IMREAD_GRAYSCALE)
+            comparing_img = cv2.resize(comparing_img, self.img_size)
+            (comparing_img_kp, comparing_img_des) = detector.detectAndCompute(comparing_img, None)
+        except:
+            print("Error: image is not available")
+            result = 10000
 
-            for j, img2 in enumerate(self.imgs):
+        try:
+            matches = bf.match(target_img_des, comparing_img_des)
+            dist = [match.distance for match in matches]
+            result = sum(dist) / len(dist)
+        except:
+            print("Error: compare is failed")
+            result = 100000
+
+        return result
+
+    def get_most_similar_img(self, imgs):
+        """
+        get the most similar image
+        :param imgs: [str]
+        :return: str (file path)
+        """
+        avg_compare_results = [0 for _ in range(len(imgs))]
+        
+        for i, target_img in enumerate(imgs):
+            for j, comparing_img in enumerate(imgs):
                 if i != j:
-                    result = 0
-
-                    img2 = cv2.imread(img2, cv2.IMREAD_GRAYSCALE)
-                    img2 = cv2.resize(img2, self.img_size)
-                    (img2_kp, img2_des) = detector.detectAndCompute(img2, None)
-                    
-                    try:
-                        matches = bf.match(img1_des, img2_des)
-                    except:
-                        remove_idx_list.append(j)
-
-                    dist = [match.distance for match in matches]
-                    result = sum(dist) / len(dist)
-                    self.avg_feature_distance[i] += result
-                
-            for remove_idx in reversed(remove_idx_list):
-                self.imgs.pop(remove_idx)
-                self.avg_feature_distance.pop(remove_idx)
-                
-        return self.avg_feature_distance
-
-    def get_most_similar_img_idx(self):
-        """
-        get the most similar image index
-        :return: int
-        """
-        compare = self.feature_detection()
-        min = compare[0]
-        img_idx = 0
+                    compare = self.feature_detection(target_img, comparing_img)
+                    avg_compare_results[i] += compare / (len(imgs) - 1)
         
-        for i, x in enumerate(compare):
-            if x < min:
-                min = x
-                img_idx = i
+        result_idx = avg_compare_results.index(min(avg_compare_results))
+        result = imgs[result_idx]
         
-        return img_idx
+        return result
 
 
 
 # test
 if __name__ == '__main__':
     imgs = []
-    for i in range(9):
-        imgs.append('C:/Users/kaich/Documents/research/program/Telestrations/ai/images/1-1-'+str(i)+'.png')
-    test = Compare_img(imgs)
-    img_idx = test.get_most_similar_img_idx()
-    print(img_idx)
-    print(test.imgs[img_idx])
-    print(test.avg_feature_distance)
+    for i in range(10):
+        imgs.append('C:/Users/kaich/Documents/research/program/Telestrations/ai/images/2-1-'+str(i)+'.png')
+    test = Compare_img()
+    #res_test1 = test.feature_detection(target_img, comparing_img1)
+    #res_test2 = test.feature_detection(target_img, comparing_img2)
+    res_test3 = test.get_most_similar_img(imgs)
+
+    #print(res_test1)
+    #print(res_test2)
+    print(res_test3)
+    
