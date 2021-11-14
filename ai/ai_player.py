@@ -14,6 +14,9 @@ class AI_Player(object):
         :param round_count: int
         """
         self.index = index
+        self.num_download_guess = 5
+        self.num_download_sketch = 10
+        self.reliable_score = 0.6
 
     def sketch(self, word, round_count):
         """
@@ -23,7 +26,7 @@ class AI_Player(object):
         """
         print('----------sketch by player {} at round {}----------'.format(self.index, round_count))
 
-        imgs = Download_img(word, 10, self.index, round_count).get_imgs()
+        imgs = Download_img(word, self.num_download_sketch, self.index, round_count).get_imgs()
         result = Compare_img().get_most_similar_img(imgs)
         print("__________{}__________".format(result))
         return result
@@ -46,9 +49,10 @@ class AI_Player(object):
         labels = response.label_annotations
 
         for i, label in enumerate(labels):
-            label_img_list = Download_img(label.description, 1, self.index, round_count).get_imgs()
-            label_img = Compare_img().get_most_similar_img(label_img_list)
-            compare_results.append(Compare_img().feature_detection(sketch, label_img))
+            if label.score >= self.reliable_score:
+                label_img_list = Download_img(label.description, self.num_download_guess, self.index, round_count).get_imgs()
+                label_img = Compare_img().get_most_similar_img(label_img_list)
+                compare_results.append(Compare_img().feature_detection(sketch, label_img))
 
         result_idx = compare_results.index(min(compare_results))
         result = labels[result_idx].description

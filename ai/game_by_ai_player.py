@@ -36,10 +36,10 @@ class Game_by_AI_player(object):
         make a secret word for each player
         :return: None
         """
-        self.sketch_books[0].append("kidney beans")
-        self.sketch_books[1].append("subway")
-        self.sketch_books[2].append("softball")
-        self.sketch_books[3].append("air bag")
+        self.sketch_books[0].append("Toxic waste")
+        self.sketch_books[1].append("Wizard")
+        self.sketch_books[2].append("Pumpkin patch")
+        self.sketch_books[3].append("Peanuts")
 
     def round(self):
         """

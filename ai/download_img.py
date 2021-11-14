@@ -5,6 +5,7 @@ Represents img(s) download object
 from bs4 import BeautifulSoup
 import requests
 import json
+from pathlib import Path
 
 class Download_img(object):
     def __init__(self, word, n, player_idx, round_count):
@@ -25,6 +26,7 @@ class Download_img(object):
             self.download()
             if len(self.imgs) == 0:
                 self.n += 1
+                print("----------------------onemore----------------------")
 
     def download(self):
         """
