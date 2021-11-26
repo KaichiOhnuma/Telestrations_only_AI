@@ -5,7 +5,7 @@ Handles wordnet
 from nltk.corpus import wordnet
 
 class Wordnet(object):
-    def __init___(self):
+    def __init__(self):
         """
         init the wordnet handler
         """
@@ -19,10 +19,14 @@ class Wordnet(object):
         """
         synsets = wordnet.synsets(wrd)
         
-        try: 
-            return synsets[0]
+        try:
+            synset = synsets[0]
         except IndexError:
-            print("The word isn't available")
+            print("The word '{}' isn't available".format(wrd))
+            return None
+
+        self.wrd_dict[wrd] = [synset, self.get_abstraction_level(synset)]
+        return synset
 
     def get_hypernym(self, synset):
         """
@@ -62,9 +66,11 @@ class Wordnet(object):
 # test
 if __name__ == '__main__':
     test = Wordnet()
-    synset = test.get_synset('kidney bean')
+    synset = test.get_synset('baseball')
+    synset2 = test.get_synset("fruit cake")
     hypernym = test.get_hypernym(synset)
     level = test.get_abstraction_level(synset)
     print(synset)
     print(hypernym)
     print(level)
+    print(test.wrd_dict)
