@@ -65,12 +65,11 @@ class Wordnet(object):
 
 # test
 if __name__ == '__main__':
+    labels = ["Sports_equipment","Ball","Nature","bat-and-ball_games","Bottle_cap",\
+        "Grass","Ball_game","Football","Biome","Baseball"]
+
     test = Wordnet()
-    synset = test.get_synset('baseball')
-    synset2 = test.get_synset("fruit cake")
-    hypernym = test.get_hypernym(synset)
-    level = test.get_abstraction_level(synset)
-    print(synset)
-    print(hypernym)
-    print(level)
+    for label in labels:
+        test.get_synset(label)
+
     print(test.wrd_dict)
