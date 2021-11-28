@@ -9,7 +9,7 @@ class Wordnet(object):
         """
         init the wordnet handler
         """
-        self.wrd_dict = {}
+        self.wrd_dict = {} # {word: [Synset[], level(int)]}
 
     def get_synset(self, wrd):
         """
@@ -62,6 +62,13 @@ class Wordnet(object):
             level += 1
 
         return level
+
+    def get_wrd_dict(self):
+        """
+        get word dictionary
+        :return: {word: [Synset[], int]}
+        """
+        return self.wrd_dict
 
 # test
 if __name__ == '__main__':

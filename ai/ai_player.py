@@ -3,6 +3,7 @@ Represents a AI player object on the client side
 """
 from download_img import Download_img
 from compare_img import Compare_img
+from wordnet_handler import Wordnet
 import os
 from google.cloud import vision
 
@@ -16,7 +17,7 @@ class AI_Player(object):
         self.index = index
         self.num_download_guess = 5
         self.num_download_sketch = 10
-        self.reliable_score = 0.6
+        self.reliable_score = 0
 
     def sketch(self, word, round_count):
         """
@@ -48,14 +49,19 @@ class AI_Player(object):
         response = client.label_detection(image=image)
         labels = response.label_annotations
 
+        wordnet = Wordnet()
+
         for i, label in enumerate(labels):
             if label.score >= self.reliable_score:
-                label_img_list = Download_img(label.description, self.num_download_guess, self.index, round_count).get_imgs()
-                label_img = Compare_img().get_most_similar_img(label_img_list)
-                compare_results.append(Compare_img().feature_detection(sketch, label_img))
+                label = label.description.replace(' ', '_')
+                wordnet.get_synset(label)
+                print(label)
 
-        result_idx = compare_results.index(min(compare_results))
-        result = labels[result_idx].description
+        label_dict = wordnet.get_wrd_dict()
+        print(label_dict)
+        result = max(label_dict.items(), key=lambda x: x[1][1])[0]
+        result = result.replace('_', ' ')
+        
 
         print("__________{}__________".format(result))
         return result
@@ -63,4 +69,4 @@ class AI_Player(object):
 # test
 if __name__ == '__main__':
     test = AI_Player(0)
-    print(test.guess('C:/Users/kaich/Documents/research/program/Telestrations/ai/images/0-1-0.png', 2))
+    print(test.guess('C:/Users/kaich/Documents/research/program/Telestrations/ai/images/0-1-5.png', 2))
