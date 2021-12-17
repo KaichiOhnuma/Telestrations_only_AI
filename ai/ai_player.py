@@ -30,6 +30,13 @@ class AI_Player(object):
             self.wrds = [line.strip() for line in f.readlines()]
 
     def sketch(self, wrd, round_count, truncation=1.):
+        """
+        sketch from the word
+        :param wrd: str
+        :param round_count: int
+        :param truncation: float, defaults to 1. 
+        :return: str (image file)
+        """
         print(f'----------sketch by player {self.idx} at round {round_count}----------')
 
         wrd_idx = self.wrds.index(wrd)
@@ -50,6 +57,12 @@ class AI_Player(object):
         return img_file
 
     def guess(self, img_file, round_count):
+        """
+        guess the image
+        :param img_file: str
+        :param round_count: int
+        :return: str (word)
+        """
         print(f'----------guess by player {self.idx} at round {round_count}----------')
 
         img = Image.open(img_file)
