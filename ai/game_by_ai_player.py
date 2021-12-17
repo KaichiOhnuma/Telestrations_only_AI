@@ -73,7 +73,7 @@ class Game_by_AI_player(object):
         self.HEIGHT = 600
         self.win = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.font.init()
-        self.guess_font = pygame.font.SysFont("Times New Roman", 30, bold=True)
+        self.guess_font = pygame.font.SysFont("Times New Roman", 20, bold=True)
         self.arrow_font = pygame.font.SysFont("Times New Roman", 50, bold=True)
         self.win.fill(self.BG)
 
@@ -82,7 +82,8 @@ class Game_by_AI_player(object):
             for j in range(self.player_num+1):
 
                 if j % 2 == 0:
-                    guess = self.guess_font.render(self.sketch_books[i][j], 1, (0,0,0))
+                    guess = self.sketch_books[i][j].split(',')[0]
+                    guess = self.guess_font.render(guess, 1, (0,0,0))
                     self.win.blit(guess, (j*self.WIDTH/(self.player_num+1) - guess.get_width()/2 + self.WIDTH/(self.player_num+1)/2, i*self.HEIGHT/self.player_num - guess.get_height()/2 + self.HEIGHT/self.player_num/2))
                 else:
                     img = pygame.image.load(self.sketch_books[i][j])
@@ -90,7 +91,7 @@ class Game_by_AI_player(object):
                     self.win.blit(img, (j*self.WIDTH/(self.player_num+1) - img.get_width()/2 + self.WIDTH/(self.player_num+1)/2, i*self.HEIGHT/self.player_num - img.get_height()/2 + self.HEIGHT/self.player_num/2))
 
                 if j != 0:
-                    arrow = self.arrow_font.render("->", 1, (0,0,0))
+                    arrow = self.arrow_font.render(">", 1, (0,0,0))
                     self.win.blit(arrow, (j*self.WIDTH/(self.player_num+1) - arrow.get_width()/2, i*self.HEIGHT/self.player_num - arrow.get_height()/2 + self.HEIGHT/self.player_num/2))
 
         pygame.display.update()
