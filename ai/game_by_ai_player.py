@@ -4,6 +4,7 @@ Handles operations related to game by AI players
 
 from ai_player import AI_Player
 import pygame
+import numpy as np
 
 class Game_by_AI_player(object):
     def __init__(self, player_num):
@@ -36,10 +37,12 @@ class Game_by_AI_player(object):
         make a secret word for each player
         :return: None
         """
-        self.sketch_books[0].append("Kidney beans")
-        self.sketch_books[1].append("Subway")
-        self.sketch_books[2].append("Softball")
-        self.sketch_books[3].append("Air bag")
+        with open('imagenet_classes.txt') as f:
+            wrds = [line.strip() for line in f.readlines()]
+
+        for i in range(self.player_num):
+            wrd_idx = np.random.randint(0, 1000)
+            self.sketch_books[i].append(wrds[wrd_idx])
 
     def round(self):
         """
