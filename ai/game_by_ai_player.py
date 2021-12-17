@@ -3,7 +3,6 @@ Handles operations related to game by AI players
 """
 
 from ai_player import AI_Player
-import pygame
 import numpy as np
 
 class Game_by_AI_player(object):
@@ -68,13 +67,15 @@ class Game_by_AI_player(object):
         draw sketchbooks when the game is done
         :return: None
         """
+        import pygame
+
         self.BG = (255,255,255)
         self.WIDTH = 1000
         self.HEIGHT = 600
-        self.win = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
+        self.win = pygame.display.set_mode((self.WIDTH, self.HEIGHT+30))
         pygame.font.init()
-        self.guess_font = pygame.font.SysFont("Times New Roman", 20, bold=True)
-        self.arrow_font = pygame.font.SysFont("Times New Roman", 50, bold=True)
+        self.guess_font = pygame.font.SysFont("timesnewroman", 20, bold=True)
+        self.arrow_font = pygame.font.SysFont("timesnewroman", 50, bold=True)
         self.win.fill(self.BG)
 
         for i in range(self.player_num):
@@ -84,15 +85,15 @@ class Game_by_AI_player(object):
                 if j % 2 == 0:
                     guess = self.sketch_books[i][j].split(',')[0]
                     guess = self.guess_font.render(guess, 1, (0,0,0))
-                    self.win.blit(guess, (j*self.WIDTH/(self.player_num+1) - guess.get_width()/2 + self.WIDTH/(self.player_num+1)/2, i*self.HEIGHT/self.player_num - guess.get_height()/2 + self.HEIGHT/self.player_num/2))
+                    self.win.blit(guess, (j*self.WIDTH/(self.player_num+1) - guess.get_width()/2 + self.WIDTH/(self.player_num+1)/2, i*self.HEIGHT/self.player_num - guess.get_height()/2 + self.HEIGHT/self.player_num/2 + i*10))
                 else:
                     img = pygame.image.load(self.sketch_books[i][j])
                     img = pygame.transform.scale(img, (self.WIDTH/(self.player_num+1), self.HEIGHT/self.player_num))
-                    self.win.blit(img, (j*self.WIDTH/(self.player_num+1) - img.get_width()/2 + self.WIDTH/(self.player_num+1)/2, i*self.HEIGHT/self.player_num - img.get_height()/2 + self.HEIGHT/self.player_num/2))
+                    self.win.blit(img, (j*self.WIDTH/(self.player_num+1) - img.get_width()/2 + self.WIDTH/(self.player_num+1)/2, i*self.HEIGHT/self.player_num - img.get_height()/2 + self.HEIGHT/self.player_num/2 + i*10))
 
                 if j != 0:
                     arrow = self.arrow_font.render(">", 1, (0,0,0))
-                    self.win.blit(arrow, (j*self.WIDTH/(self.player_num+1) - arrow.get_width()/2, i*self.HEIGHT/self.player_num - arrow.get_height()/2 + self.HEIGHT/self.player_num/2))
+                    self.win.blit(arrow, (j*self.WIDTH/(self.player_num+1) - arrow.get_width()/2, i*self.HEIGHT/self.player_num - arrow.get_height()/2 + self.HEIGHT/self.player_num/2 + i*10))
 
         pygame.display.update()
         
