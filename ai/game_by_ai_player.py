@@ -72,7 +72,7 @@ class Game_by_AI_player(object):
         self.BG = (255,255,255)
         self.WIDTH = 1000
         self.HEIGHT = 600
-        self.win = pygame.display.set_mode((self.WIDTH, self.HEIGHT+30))
+        self.win = pygame.display.set_mode((self.WIDTH, self.HEIGHT+10*self.player_num))
         pygame.font.init()
         self.guess_font = pygame.font.SysFont("timesnewroman", 20, bold=True)
         self.arrow_font = pygame.font.SysFont("timesnewroman", 50, bold=True)
@@ -99,6 +99,6 @@ class Game_by_AI_player(object):
         
 
 if __name__ == "__main__":
-    game = Game_by_AI_player(4)
+    game = Game_by_AI_player(8)
     while True:
         game.draw()
