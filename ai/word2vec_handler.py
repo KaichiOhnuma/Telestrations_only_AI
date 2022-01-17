@@ -1,33 +1,38 @@
+"""
+ class to handle word2vec
+"""
+from asyncio.windows_events import NULL
 import gensim
 import numpy as np
 
 class Word2vec_handler(object):
-    def __init__(self):
+    def __init__(self, all_wrds):
+        """
+        init the word2vec handler
+        :param all_wrds: [str]
+        """
+        self.all_wrds = all_wrds
+
         print("launching word2vec model ....................................")
         self.model = gensim.models.KeyedVectors.load_word2vec_format('C:/Users/onuma/Documents/research/program/GoogleNews-vectors-negative300.bin', binary=True)
         print("launched word2vec model!")
-        self.make_wrd_vec_list()
 
-    def make_wrd_vec_list(self):
-        self.wrd_vec_list = []
-
-        self.search_available_word()
-
-        for wrd in self.wrds:
-            self.wrd_vec_list.append(self.model[wrd])
+        self.available_wrd_idx = []   # [int] (index of available word)
+        self.available_wrds = []      # [str] (available word)
+        self.wrd_vec_list = [ [] for _ in range(1000)]          # [float] (word vector, unavailable word vector is NULL)
+        self.unavailable_wrd_idxs = [ i for i in range(1000)]  # [int] (index of unabailable word)
+        
+        self.search_available_word()     
 
     def search_available_word(self):
-
-        with open('imagenet_classes.txt') as f:
-            wrds = [line.strip() for line in f.readlines()]
-
-        self.wrd_idx = []
-        self.wrds = []
-
-        for idx, wrd in enumerate(wrds):
+        """
+        search available word in word2vec 
+        """
+        for idx, wrd in enumerate(self.all_wrds):
             wrd_list = wrd.split(', ')
+            
             for wrd in wrd_list:
-
+                isavailable = False
                 case1 = wrd
                 case2 = wrd.replace(' ', '_')
                 case3 = wrd.replace('-', '_')
@@ -41,56 +46,57 @@ class Word2vec_handler(object):
                 case11 = wrd.replace(' ', '_').lower()
 
                 if case1 in self.model:
-                    self.wrds.append(case1)
-                    self.wrd_idx.append(idx)               
-                    break
+                    success_word = case1
+                    isavailable = True
                 elif case2 in self.model:
-                    self.wrds.append(case2)
-                    self.wrd_idx.append(idx)               
-                    break
+                    success_word = case2
+                    isavailable = True
                 elif case3 in self.model:
-                    self.wrds.append(case3)
-                    self.wrd_idx.append(idx)               
-                    break
+                    success_word = case3
+                    isavailable = True
                 elif case4 in self.model:
-                    self.wrds.append(case4)
-                    self.wrd_idx.append(idx)               
-                    break
+                    success_word = case4
+                    isavailable = True
                 elif case5 in self.model:
-                    self.wrds.append(case5)
-                    self.wrd_idx.append(idx)               
-                    break
+                    success_word = case5
+                    isavailable = True
                 elif case6 in self.model:
-                    self.wrds.append(case6)
-                    self.wrd_idx.append(idx)               
-                    break
+                    success_word = case6
+                    isavailable = True
                 elif case7 in self.model:
-                    self.wrds.append(case7)
-                    self.wrd_idx.append(idx)               
-                    break
+                    success_word = case7
+                    isavailable = True
                 elif case8 in self.model:
-                    self.wrds.append(case8)
-                    self.wrd_idx.append(idx)               
-                    break
+                    success_word = case8
+                    isavailable = True
                 elif case9 in self.model:
-                    self.wrds.append(case9)
-                    self.wrd_idx.append(idx)               
-                    break
+                    success_word = case9
+                    isavailable = True
                 elif case10 in self.model:
-                    self.wrds.append(case10)
-                    self.wrd_idx.append(idx)               
-                    break
+                    success_word = case10
+                    isavailable = True
                 elif case11 in self.model:
-                    self.wrds.append(case11)
-                    self.wrd_idx.append(idx)               
+                    success_word = case11
+                    isavailable = True
+
+                if isavailable:
+                    self.available_wrds.append(success_word)
+                    self.available_wrd_idx.append(idx)
+                    self.unavailable_wrd_idxs.remove(idx)
+                    self.wrd_vec_list[idx] = self.model[success_word]
                     break
         
     def get_cos_sim(self, v1, v2):
-        return np.dot(v1, v2) / (np.linalg.norm(v1)*np.linalg.norm(v2))
+        """
+        calculate cosine similarity 
+        :param v1: np.array (dim 300)
+        :param v2: np.array (dim 300)
+        :return: float (cosine similarity)
+        """
+        return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
 
 if __name__ == "__main__":
-    test_class = Word2vec_handler()
-    v1 = test_class.wrd_vec_list[644]
-    v2 = test_class.wrd_vec_list[642]
-    print(test_class.get_cos_sim(v1, v2))
-    print(f"{test_class.wrds[644]}-{test_class.wrds[642]}")
+    with open('imagenet_classes.txt') as f:
+        all_wrds = [line.strip() for line in f.readlines()]
+    test_class = Word2vec_handler(all_wrds)
+    print(test_class.get_cos_sim(test_class.wrd_vec_list[0], test_class.wrd_vec_list[1]))
