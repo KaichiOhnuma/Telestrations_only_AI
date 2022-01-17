@@ -1,6 +1,9 @@
 """
 Represents a AI player object on the client side
 """
+from asyncio.windows_events import NULL
+from word2vec_handler import Word2vec_handler
+
 import numpy as np
 from pytorch_pretrained_biggan import BigGAN, one_hot_from_int, truncated_noise_sample, convert_to_images
 from torchvision import models, transforms
@@ -28,6 +31,10 @@ class AI_Player(object):
 
         with open('imagenet_classes.txt') as f:
             self.wrds = [line.strip() for line in f.readlines()]
+
+        self.word_vector_handler = Word2vec_handler(self.wrds)
+        self.unavailable_wrd_idxs = self.word_vector_handler.unavailable_wrd_idxs
+        self.wrd_vec_list = self.word_vector_handler.wrd_vec_list
 
     def sketch(self, wrd, round_count, truncation=1.):
         """
@@ -65,21 +72,27 @@ class AI_Player(object):
         """
         print(f'----------guess by player {self.idx} at round {round_count}----------')
 
+        base_vector = np.full(300, 0.0)
+
         img = Image.open(img_file)
         img = self.transform(img)
 
         classification = self.classifier(img.unsqueeze(0))
-        _, rank_idxs = torch.sort(classification, descending=True)
-        percentage = torch.nn.functional.softmax(classification, dim=1)[0]
+        unavailable_wrd_score = torch.min(classification)
+        for unavailable_wrd_idx in self.unavailable_wrd_idxs:
+            classification[0 ,unavailable_wrd_idx] = unavailable_wrd_score
 
-        res_idxs = np.array([idx for idx in rank_idxs[0][:self.reliable_label]])
-        res_wrds = np.array([self.wrds[idx] for idx in res_idxs])
-        res_probs = np.array([percentage[idx].item() for idx in res_idxs])
+        percentages = torch.nn.functional.softmax(classification, dim=1)[0]
+        #_, rank_idxs = torch.sort(classification, descending=True)
 
-        print(res_wrds[0])
-        return res_wrds[0]
+        for idx, percentage in enumerate(percentages):
+            if not idx in self.unavailable_wrd_idxs:
+                base_vector += self.wrd_vec_list[idx] * percentage.item()
 
+        return base_vector
+
+        
 # test
 if __name__ == '__main__':
     test = AI_Player(0)
-    print(test.sketch('triceratops', 0))
+    print(test.guess("C:/Users/onuma/Documents/research/program/Telestrations/ai/images/0-0.png", 0))
