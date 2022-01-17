@@ -1,66 +1,85 @@
 """
 Represents a AI player object on the client side
 """
-from download_img import Download_img
-from compare_img import Compare_img
-import os
-from google.cloud import vision
+import numpy as np
+from pytorch_pretrained_biggan import BigGAN, one_hot_from_int, truncated_noise_sample, convert_to_images
+from torchvision import models, transforms
+import torch
+from PIL import Image
 
 class AI_Player(object):
-    def __init__(self, index):
+    def __init__(self, idx):
         """
         init the AI player object
         :param index: int
         :param round_count: int
         """
-        self.index = index
-        self.num_download_guess = 5
-        self.num_download_sketch = 10
-        self.reliable_score = 0.6
+        self.idx = idx
+        self.reliable_label = 5
+        self.gan = BigGAN.from_pretrained('biggan-deep-512')
+        self.classifier = models.resnet152(pretrained=True)
+        self.classifier.eval()
+        self.transform = transforms.Compose([
+            transforms.Resize(224),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485,0.456,0.406], std=[0.229,0.224,0.225])
+        ])
 
-    def sketch(self, word, round_count):
+        with open('imagenet_classes.txt') as f:
+            self.wrds = [line.strip() for line in f.readlines()]
+
+    def sketch(self, wrd, round_count, truncation=1.):
         """
-        make a sketch from the word
-        :param word: str
-        :return: str (file path)
+        sketch from the word
+        :param wrd: str
+        :param round_count: int
+        :param truncation: float, defaults to 1. 
+        :return: str (image file)
         """
-        print('----------sketch by player {} at round {}----------'.format(self.index, round_count))
+        print(f'----------sketch by player {self.idx} at round {round_count}----------')
 
-        imgs = Download_img(word, self.num_download_sketch, self.index, round_count).get_imgs()
-        result = Compare_img().get_most_similar_img(imgs)
-        print("__________{}__________".format(result))
-        return result
+        wrd_idx = self.wrds.index(wrd)
+        class_vector = one_hot_from_int([wrd_idx], batch_size=1)
+        class_vector = torch.from_numpy(class_vector)
+        
+        noise_vector = truncated_noise_sample(truncation=truncation, batch_size=1)
+        noise_vector = torch.from_numpy(noise_vector)
 
-    def guess(self, sketch, round_count):
+        with torch.no_grad():
+            output = self.gan(noise_vector, class_vector, truncation)
+
+        img = convert_to_images(output)
+        img_file = f'C:/Users/kaich/Documents/research/program/Telestrations/ai/images/{self.idx}-{round_count}.png'
+        img[0].save(img_file, quality=95)
+
+        print(img_file)
+        return img_file
+
+    def guess(self, img_file, round_count):
         """
-        make a guess from the sketch
-        :param sketch: str (file path)
-        :return: str
+        guess the image
+        :param img_file: str
+        :param round_count: int
+        :return: str (word)
         """
-        print('----------guess by player {} at round {}----------'.format(self.index, round_count))
-        compare_results = []
+        print(f'----------guess by player {self.idx} at round {round_count}----------')
 
-        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'C:\\Users\\onuma\\Documents\\research\\program\\telestrations-project-0c546ef63b6a.json'
-        client = vision.ImageAnnotatorClient()
-        with open(sketch,'rb') as image_file:
-            content = image_file.read()
-        image = vision.Image(content=content)
-        response = client.label_detection(image=image)
-        labels = response.label_annotations
+        img = Image.open(img_file)
+        img = self.transform(img)
 
-        for i, label in enumerate(labels):
-            if label.score >= self.reliable_score:
-                label_img_list = Download_img(label.description, self.num_download_guess, self.index, round_count).get_imgs()
-                label_img = Compare_img().get_most_similar_img(label_img_list)
-                compare_results.append(Compare_img().feature_detection(sketch, label_img))
+        classification = self.classifier(img.unsqueeze(0))
+        _, rank_idxs = torch.sort(classification, descending=True)
+        percentage = torch.nn.functional.softmax(classification, dim=1)[0]
 
-        result_idx = compare_results.index(min(compare_results))
-        result = labels[result_idx].description
+        res_idxs = np.array([idx for idx in rank_idxs[0][:self.reliable_label]])
+        res_wrds = np.array([self.wrds[idx] for idx in res_idxs])
+        res_probs = np.array([percentage[idx].item() for idx in res_idxs])
 
-        print("__________{}__________".format(result))
-        return result
+        print(res_wrds[0])
+        return res_wrds[0]
 
 # test
 if __name__ == '__main__':
     test = AI_Player(0)
-    print(test.guess('C:/Users/kaich/Documents/research/program/Telestrations/ai/images/0-1-0.png', 2))
+    print(test.sketch('triceratops', 0))
