@@ -99,6 +99,6 @@ class Game_by_AI_player(object):
         
 
 if __name__ == "__main__":
-    game = Game_by_AI_player(8)
+    game = Game_by_AI_player(4)
     while True:
         game.draw()

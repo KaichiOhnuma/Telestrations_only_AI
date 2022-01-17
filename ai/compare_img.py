@@ -87,7 +87,7 @@ class Compare_img(object):
 if __name__ == '__main__':
     imgs = []
     for i in range(10):
-        imgs.append('C:/Users/kaich/Documents/research/program/Telestrations/ai/images/2-1-'+str(i)+'.png')
+        imgs.append('C:/Users/onuma/Documents/research/program/Telestrations/ai/images/2-1-'+str(i)+'.png')
     test = Compare_img()
     #res_test1 = test.feature_detection(target_img, comparing_img1)
     #res_test2 = test.feature_detection(target_img, comparing_img2)
