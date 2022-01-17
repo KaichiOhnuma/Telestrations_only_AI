@@ -48,7 +48,7 @@ class Download_img(object):
                 img_link = json_data['murl']
                 res = requests.get(img_link, stream=True, timeout=(6.0, 10.0))
                 if res.status_code == 200:
-                    img_file = 'C:/Users/kaich/Documents/research/program/Telestrations/ai/images/'+str(self.player_idx)+'-'+str(self.round_count)+'-'+str(i)+'.png'
+                    img_file = 'C:/Users/onuma/Documents/research/program/Telestrations/ai/images/'+str(self.player_idx)+'-'+str(self.round_count)+'-'+str(i)+'.png'
                     with open(img_file, 'wb') as f:
                         f.write(res.content)
                         self.imgs.append(img_file)

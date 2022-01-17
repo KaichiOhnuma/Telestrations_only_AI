@@ -40,7 +40,7 @@ class AI_Player(object):
         print('----------guess by player {} at round {}----------'.format(self.index, round_count))
         compare_results = []
 
-        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'C:\\Users\\kaich\\Documents\\research\\program\\telestrations-project-395eec6b87fc.json'
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'C:\\Users\\onuma\\Documents\\research\\program\\telestrations-project-0c546ef63b6a.json'
         client = vision.ImageAnnotatorClient()
         with open(sketch,'rb') as image_file:
             content = image_file.read()
