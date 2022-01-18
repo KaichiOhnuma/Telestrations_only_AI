@@ -1,14 +1,12 @@
 """
 Represents a AI player object on the client side
 """
-from asyncio.windows_events import NULL
-from word2vec_handler import Word2vec_handler
-
 import numpy as np
 from pytorch_pretrained_biggan import BigGAN, one_hot_from_int, truncated_noise_sample, convert_to_images
 from torchvision import models, transforms
 import torch
 from PIL import Image
+import gc
 
 class AI_Player(object):
     def __init__(self, idx):
@@ -32,9 +30,9 @@ class AI_Player(object):
         with open('imagenet_classes.txt') as f:
             self.wrds = [line.strip() for line in f.readlines()]
 
-        self.word_vector_handler = Word2vec_handler(self.wrds)
-        self.unavailable_wrd_idxs = self.word_vector_handler.unavailable_wrd_idxs
-        self.wrd_vec_list = self.word_vector_handler.wrd_vec_list
+        wrd_vec_file = np.load("word_vector.npz")
+        self.unavailable_wrd_idxs = wrd_vec_file["unavailable_wrd_idxs"]
+        self.wrd_vec_list = wrd_vec_file["wrd_vec_list"]
 
     def sketch(self, wrd, round_count, truncation=1.):
         """
@@ -60,7 +58,9 @@ class AI_Player(object):
         img_file = f'C:/Users/onuma/Documents/research/program/Telestrations/ai/images/{self.idx}-{round_count}.png'
         img[0].save(img_file, quality=95)
 
-        #print(img_file)
+        del class_vector, noise_vector, output, img
+        gc.collect()
+
         return img_file
 
     def guess(self, img_file, round_count, mutation_rate, mutation_degree):
@@ -74,6 +74,7 @@ class AI_Player(object):
 
         wrd_vec_dis = []
         base_vector = np.full(300, 0.0)
+        mutation = [True, False]
         img = Image.open(img_file)
         img = self.transform(img)
 
@@ -89,13 +90,14 @@ class AI_Player(object):
             if not idx in self.unavailable_wrd_idxs:
                 base_vector += self.wrd_vec_list[idx] * percentage.item()
 
-        base_vector = self.word_vector_handler.wrd_vec_mutation(base_vector, mutation_rate, mutation_degree)
+        if np.random.choice(mutation, p=[mutation_rate, 1-mutation_rate]):
+            base_vector = base_vector * mutation_degree
 
         for idx, wrd_vec in enumerate(self.wrd_vec_list):
             if idx in self.unavailable_wrd_idxs:
                 wrd_vec_dis.append(-1)
             else:
-                d = self.word_vector_handler.get_cos_sim(base_vector, wrd_vec)
+                d = np.dot(base_vector, wrd_vec) / (np.linalg.norm(base_vector) * np.linalg.norm(wrd_vec))
                 wrd_vec_dis.append(d)
         
         res_wrd_idx = wrd_vec_dis.index(max(wrd_vec_dis))
