@@ -59,7 +59,7 @@ class Game_by_AI_player(object):
             
             # guess turn
             else:
-                guess = self.players[i].guess(self.sketch_books[sketch_book_idx][self.round_count-1], self.round_count)
+                guess = self.players[i].guess(self.sketch_books[sketch_book_idx][self.round_count-1], self.round_count, 0, 1)
                 self.sketch_books[sketch_book_idx].append(guess)
 
     def draw(self):
