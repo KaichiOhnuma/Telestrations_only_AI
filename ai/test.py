@@ -153,8 +153,8 @@ class Test(object):
         self.evaluate_process()
 
 if __name__ == "__main__":
-    step_n = 20
-    iteration = 10
+    step_n = 2
+    iteration = 2
 
     test = Test(step_n=step_n, iteration=iteration)
 
