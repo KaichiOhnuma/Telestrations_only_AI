@@ -44,7 +44,7 @@ class AI_Player(object):
         :param truncation: float, defaults to 1. 
         :return: str (image file)
         """
-        print(f'----------sketch by player {self.idx} at round {round_count}----------')
+        print(f'sketching by player {self.idx} at round {round_count}....')
 
         wrd_idx = self.wrds.index(wrd)
         class_vector = one_hot_from_int([wrd_idx], batch_size=1)
@@ -60,20 +60,20 @@ class AI_Player(object):
         img_file = f'C:/Users/onuma/Documents/research/program/Telestrations/ai/images/{self.idx}-{round_count}.png'
         img[0].save(img_file, quality=95)
 
-        print(img_file)
+        #print(img_file)
         return img_file
 
-    def guess(self, img_file, round_count):
+    def guess(self, img_file, round_count, mutation_rate, mutation_degree):
         """
         guess the image
         :param img_file: str
         :param round_count: int
         :return: str (word)
         """
-        print(f'----------guess by player {self.idx} at round {round_count}----------')
+        print(f'guessing by player {self.idx} at round {round_count}....')
 
+        wrd_vec_dis = []
         base_vector = np.full(300, 0.0)
-
         img = Image.open(img_file)
         img = self.transform(img)
 
@@ -89,10 +89,22 @@ class AI_Player(object):
             if not idx in self.unavailable_wrd_idxs:
                 base_vector += self.wrd_vec_list[idx] * percentage.item()
 
-        return base_vector
+        base_vector = self.word_vector_handler.wrd_vec_mutation(base_vector, mutation_rate, mutation_degree)
+
+        for idx, wrd_vec in enumerate(self.wrd_vec_list):
+            if idx in self.unavailable_wrd_idxs:
+                wrd_vec_dis.append(-1)
+            else:
+                d = self.word_vector_handler.get_cos_sim(base_vector, wrd_vec)
+                wrd_vec_dis.append(d)
+        
+        res_wrd_idx = wrd_vec_dis.index(max(wrd_vec_dis))
+        res_wrd = self.wrds[res_wrd_idx]
+
+        return res_wrd
 
         
 # test
 if __name__ == '__main__':
     test = AI_Player(0)
-    print(test.guess("C:/Users/onuma/Documents/research/program/Telestrations/ai/images/0-0.png", 0))
+    print(test.sketch("flamingo", round_count=0, truncation=1))

@@ -95,8 +95,17 @@ class Word2vec_handler(object):
         """
         return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
 
+    def wrd_vec_mutation(self, vec, rate, degree):
+        p = [rate, 1-rate]
+        mutation = [True, False]
+
+        if np.random.choice(mutation, p=p):
+            return vec * degree
+        return vec
+
 if __name__ == "__main__":
     with open('imagenet_classes.txt') as f:
         all_wrds = [line.strip() for line in f.readlines()]
     test_class = Word2vec_handler(all_wrds)
-    print(test_class.get_cos_sim(test_class.wrd_vec_list[0], test_class.wrd_vec_list[1]))
+    print(test_class.wrd_vec_list[0])
+    print(test_class.wrd_vec_mutation(test_class.wrd_vec_list[0], 0, 1))
