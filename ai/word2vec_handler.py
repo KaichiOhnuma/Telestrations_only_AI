@@ -95,17 +95,19 @@ class Word2vec_handler(object):
         """
         return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
 
-    def wrd_vec_mutation(self, vec, rate, degree):
-        p = [rate, 1-rate]
-        mutation = [True, False]
+    def make_wrd_vec_file(self):
 
-        if np.random.choice(mutation, p=p):
-            return vec * degree
-        return vec
+        for i in range(0, 1000):
+            if i in self.unavailable_wrd_idxs:
+                self.wrd_vec_list[i] = [0 for _ in range(300)]
+
+        wrd_vec_list = np.array(self.wrd_vec_list)
+        unavailable_wrd_idxs = np.array(self.unavailable_wrd_idxs)
+
+        np.savez('word_vector', wrd_vec_list=wrd_vec_list, unavailable_wrd_idxs=unavailable_wrd_idxs)
 
 if __name__ == "__main__":
     with open('imagenet_classes.txt') as f:
         all_wrds = [line.strip() for line in f.readlines()]
     test_class = Word2vec_handler(all_wrds)
-    print(test_class.wrd_vec_list[0])
-    print(test_class.wrd_vec_mutation(test_class.wrd_vec_list[0], 0, 1))
+    test_class.make_wrd_vec_file()
