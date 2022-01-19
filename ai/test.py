@@ -24,7 +24,7 @@ class Test(object):
 
         self.truncation_list = [0.004]
         self.mutation_rate_list = [1]
-        self.mutation_degree_list = [0.3, 0.5, 0.75, 1]
+        self.mutation_degree_list = [0]
         
         self.setting = []
 
@@ -107,6 +107,9 @@ class Test(object):
                     sim_to_s_wrd.append(sim2)
                     if previous_wrd_idx != current_wrd_idx:
                         failed += 1
+
+                    previous_wrd_idx = current_wrd_idx
+                    previous_wrd_vec = current_wrd_vec
                 
                 sim_to_p_wrd_list.append(sim_to_p_wrd)
                 sim_to_s_wrd_list.append(sim_to_s_wrd)
@@ -153,8 +156,8 @@ class Test(object):
         self.evaluate_process()
 
 if __name__ == "__main__":
-    step_n = 16
-    iteration = 10
+    step_n = 50
+    iteration = 15
 
     test = Test(step_n=step_n, iteration=iteration)
 
