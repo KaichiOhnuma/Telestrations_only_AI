@@ -55,7 +55,7 @@ class AI_Player(object):
             output = self.gan(noise_vector, class_vector, truncation)
 
         img = convert_to_images(output)
-        img_file = f'C:/Users/onuma/Documents/research/program/Telestrations/ai/images/{self.idx}-{round_count}.png'
+        img_file = f'C:/Users/kaich/Documents/research/program/Telestrations/ai/images/{self.idx}-{round_count}.png'
         img[0].save(img_file, quality=95)
 
         del class_vector, noise_vector, output, img
@@ -74,10 +74,9 @@ class AI_Player(object):
 
         wrd_vec_dis = []
         base_vector = np.full(300, 0.0)
-        mutation = [True, False]
         img = Image.open(img_file)
         img = self.transform(img)
-
+        
         classification = self.classifier(img.unsqueeze(0))
         unavailable_wrd_score = torch.min(classification)
         for unavailable_wrd_idx in self.unavailable_wrd_idxs:
@@ -90,8 +89,7 @@ class AI_Player(object):
             if not idx in self.unavailable_wrd_idxs:
                 base_vector += self.wrd_vec_list[idx] * percentage.item()
 
-        if np.random.choice(mutation, p=[mutation_rate, 1-mutation_rate]):
-            base_vector = base_vector * mutation_degree
+        base_vector = self.mutation(base_vector, mutation_rate, mutation_degree)
 
         for idx, wrd_vec in enumerate(self.wrd_vec_list):
             if idx in self.unavailable_wrd_idxs:
@@ -103,10 +101,20 @@ class AI_Player(object):
         res_wrd_idx = wrd_vec_dis.index(max(wrd_vec_dis))
         res_wrd = self.wrds[res_wrd_idx]
 
-        return res_wrd
+        del wrd_vec_dis, base_vector, img, classification, unavailable_wrd_score, percentages, idx, percentage, wrd_vec, res_wrd_idx
+        gc.collect()
 
+        return res_wrd
+    
+    def mutation(self, vec, mutation_rate, mutation_degree):
+        mutation = [True, False]
+        if np.random.choice(mutation, p=[mutation_rate, 1-mutation_rate]):
+            mutation_vec = 2 * mutation_degree * np.random.rand(len(vec)) - mutation_degree
+            vec += mutation_vec
+
+        return vec
         
 # test
 if __name__ == '__main__':
     test = AI_Player(0)
-    print(test.sketch("flamingo", round_count=0, truncation=1))
+    print(test.guess("./images/0-1.png", round_count=0, mutation_rate=0, mutation_degree=1))

@@ -22,9 +22,9 @@ class Test(object):
         self.unavailable_wrd_idxs = wrd_vec_file["unavailable_wrd_idxs"]
         self.wrd_vec_list = wrd_vec_file["wrd_vec_list"]
 
-        self.truncation_list = [0.004, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-        self.mutation_rate_list = [0]
-        self.mutation_degree_list = [1]
+        self.truncation_list = [0.004]
+        self.mutation_rate_list = [1]
+        self.mutation_degree_list = [0.3, 0.5, 0.75, 1]
         
         self.setting = []
 
@@ -153,8 +153,8 @@ class Test(object):
         self.evaluate_process()
 
 if __name__ == "__main__":
-    step_n = 2
-    iteration = 2
+    step_n = 16
+    iteration = 10
 
     test = Test(step_n=step_n, iteration=iteration)
 
