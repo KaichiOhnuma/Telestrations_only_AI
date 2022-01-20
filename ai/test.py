@@ -82,11 +82,13 @@ class Test(object):
         self.avg_sim_to_s_wrd = []
         self.avg_final_sim_to_s_wrd = []
         self.prob_of_failure = []
+        self.avg_number_of_wrd = []
 
         for passed_wrd_list in self.passed_wrd_list_book:
             sim_to_p_wrd_list = []
             sim_to_s_wrd_list = []
             failed = 0
+            number_of_wrd_list = []
 
             for passed_wrd in passed_wrd_list:
                 secret_wrd = passed_wrd[0]
@@ -97,28 +99,36 @@ class Test(object):
 
                 sim_to_p_wrd = []
                 sim_to_s_wrd = []
+                passed_wrd_idxs = []
                 
                 for current_wrd in passed_wrd:
                     current_wrd_idx = self.player.wrds.index(current_wrd)
                     current_wrd_vec = self.wrd_vec_list[current_wrd_idx]
                     sim1 = self.get_cos_sim(secret_wrd_vec, current_wrd_vec)
                     sim2 = self.get_cos_sim(previous_wrd_vec, current_wrd_vec)
+
                     sim_to_p_wrd.append(sim2)
                     sim_to_s_wrd.append(sim1)
                     if previous_wrd_idx != current_wrd_idx:
                         failed += 1
+                    if not current_wrd_idx in passed_wrd_idxs:
+                        passed_wrd_idxs.append(current_wrd_idx)
 
                     previous_wrd_idx = current_wrd_idx
                     previous_wrd_vec = current_wrd_vec
                 
                 sim_to_p_wrd_list.append(sim_to_p_wrd)
                 sim_to_s_wrd_list.append(sim_to_s_wrd)
+                number_of_wrd_list.append(len(passed_wrd_idxs))
 
             self.sim_to_previous_wrd.append(sim_to_p_wrd_list)
             self.sim_to_secret_wrd.append(sim_to_s_wrd_list)
 
             p = failed / (len(passed_wrd)-1) / self.iteration
+            avg_n_of_wrd = sum(number_of_wrd_list) / len(number_of_wrd_list)
+
             self.prob_of_failure.append(p)
+            self.avg_number_of_wrd.append(avg_n_of_wrd)
         
         for i in range(len(self.passed_wrd_list_book)):
             avg_sim_to_p_wrd = 0
@@ -168,3 +178,4 @@ if __name__ == "__main__":
         print("average cosine similarity to secret word: {}".format(test.avg_sim_to_s_wrd[i]))
         print("final cosine similarity to secret word: {}".format(test.avg_final_sim_to_s_wrd[i]))
         print("probability of failure: {}".format(test.prob_of_failure[i]))
+        print("average number of used word: {}".format(test.avg_number_of_wrd[i]))
