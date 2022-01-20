@@ -22,9 +22,9 @@ class Test(object):
         self.unavailable_wrd_idxs = wrd_vec_file["unavailable_wrd_idxs"]
         self.wrd_vec_list = wrd_vec_file["wrd_vec_list"]
 
-        self.truncation_list = [0.004]
+        self.truncation_list = [0.5]
         self.mutation_rate_list = [1]
-        self.mutation_degree_list = [0]
+        self.mutation_degree_list = [2.0]
         
         self.setting = []
 
@@ -103,8 +103,8 @@ class Test(object):
                     current_wrd_vec = self.wrd_vec_list[current_wrd_idx]
                     sim1 = self.get_cos_sim(secret_wrd_vec, current_wrd_vec)
                     sim2 = self.get_cos_sim(previous_wrd_vec, current_wrd_vec)
-                    sim_to_p_wrd.append(sim1)
-                    sim_to_s_wrd.append(sim2)
+                    sim_to_p_wrd.append(sim2)
+                    sim_to_s_wrd.append(sim1)
                     if previous_wrd_idx != current_wrd_idx:
                         failed += 1
 
@@ -128,7 +128,7 @@ class Test(object):
             for j in range(self.iteration):
                 avg_sim_to_p_wrd += sum(self.sim_to_previous_wrd[i][j]) / len(self.sim_to_previous_wrd[i][j]) / self.iteration
                 avg_sim_to_s_wrd += sum(self.sim_to_secret_wrd[i][j]) / len(self.sim_to_secret_wrd[i][j]) / self.iteration
-                avg_final_sim_to_s_wrd += self.sim_to_secret_wrd[i][j][len(passed_wrd)-1] / self.iteration
+                avg_final_sim_to_s_wrd += self.sim_to_secret_wrd[i][j][len(self.sim_to_secret_wrd[i][j])-1] / self.iteration
             
             self.avg_sim_to_p_wrd.append(avg_sim_to_p_wrd)
             self.avg_sim_to_s_wrd.append(avg_sim_to_s_wrd)
