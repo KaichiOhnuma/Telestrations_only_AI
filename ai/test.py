@@ -5,37 +5,31 @@ Represent object of Evaluation test for AI player
 from ai_player import AI_Player
 
 import numpy as np
+import sys
 
 class Test(object):
-    def __init__(self, step_n, iteration):
+    def __init__(self):
         """
         init the Evaluation test object
         :param step_n: int 
         :param iteration: int 
         """
-        self.step_n = step_n
-        self.iteration = iteration
+        self.step_n = int(input("step_n: "))
+        self.iteration = int(input("iteration: "))
+        self.truncation = float(input("truncation: "))
+        self.mutation_degree = float(input("mutation degree: "))
+        self.mutation_rate = float(input("mutation rate: "))
+
         self.player = AI_Player(0)
-        self.passed_wrd_list_book = []
+        self.passed_wrd_list = []
 
         wrd_vec_file = np.load("word_vector.npz")
         self.unavailable_wrd_idxs = wrd_vec_file["unavailable_wrd_idxs"]
         self.wrd_vec_list = wrd_vec_file["wrd_vec_list"]
 
-        self.truncation_list = [0.02]
-        self.mutation_rate_list = [1]
-        self.mutation_degree_list = [0.5]
-        
-        self.setting = []
-
-        for truncation in self.truncation_list:
-            for mutation_rate in self.mutation_rate_list:
-                for mutation_degree in self.mutation_degree_list:
-                    self.setting.append([truncation, mutation_rate, mutation_degree])
-
         self.main()
 
-    def round(self, truncation, mutation_rate, mutation_degree):
+    def round(self):
         """
         do one round
         :return: None
@@ -48,12 +42,12 @@ class Test(object):
 
             # sketch turn
             if i % 2 == 0:
-                sketch = self.player.sketch(self.sketch_book[i], round_count=i+1, truncation=truncation)
+                sketch = self.player.sketch(self.sketch_book[i], round_count=i+1, truncation=self.truncation)
                 self.sketch_book.append(sketch)
 
             # guess turn
             else:
-                guess = self.player.guess(self.sketch_book[i], round_count=i+1, mutation_rate=mutation_rate, mutation_degree=mutation_degree)
+                guess = self.player.guess(self.sketch_book[i], round_count=i+1, mutation_rate=self.mutation_rate, mutation_degree=self.mutation_degree)
                 self.sketch_book.append(guess)
                 self.passed_wrd.append(guess)
 
@@ -78,104 +72,65 @@ class Test(object):
         self.sim_to_previous_wrd = []
         self.sim_to_secret_wrd = []
 
-        self.avg_sim_to_p_wrd = []
-        self.avg_sim_to_s_wrd = []
-        self.avg_final_sim_to_s_wrd = []
-        self.prob_of_failure = []
-        self.avg_number_of_wrd = []
+        self.avg_number_of_wrd = 0
+        self.avg_sim_to_p_wrd = 0
+        self.avg_sim_to_s_wrd = 0
+        self.avg_final_sim_to_s_wrd = 0
 
-        for passed_wrd_list in self.passed_wrd_list_book:
-            sim_to_p_wrd_list = []
-            sim_to_s_wrd_list = []
-            failed = 0
-            number_of_wrd_list = []
+        failed = 0
 
-            for passed_wrd in passed_wrd_list:
-                secret_wrd = passed_wrd[0]
-                secret_wrd_idx = self.player.wrds.index(secret_wrd)
-                secret_wrd_vec = self.wrd_vec_list[secret_wrd_idx]
-                previous_wrd_vec = secret_wrd_vec
-                previous_wrd_idx = secret_wrd_idx
 
-                sim_to_p_wrd = []
-                sim_to_s_wrd = []
-                passed_wrd_idxs = []
-                
-                for current_wrd in passed_wrd:
-                    current_wrd_idx = self.player.wrds.index(current_wrd)
-                    current_wrd_vec = self.wrd_vec_list[current_wrd_idx]
-                    sim1 = self.get_cos_sim(secret_wrd_vec, current_wrd_vec)
-                    sim2 = self.get_cos_sim(previous_wrd_vec, current_wrd_vec)
+        for passed_wrd in self.passed_wrd_list:
+            secret_wrd = passed_wrd[0]
+            secret_wrd_idx = self.player.wrds.index(secret_wrd)
+            secret_wrd_vec = self.wrd_vec_list[secret_wrd_idx]
+            previous_wrd_vec = secret_wrd_vec
+            previous_wrd_idx = secret_wrd_idx
 
-                    sim_to_p_wrd.append(sim2)
-                    sim_to_s_wrd.append(sim1)
-                    if previous_wrd_idx != current_wrd_idx:
-                        failed += 1
-                    if not current_wrd_idx in passed_wrd_idxs:
-                        passed_wrd_idxs.append(current_wrd_idx)
-
-                    previous_wrd_idx = current_wrd_idx
-                    previous_wrd_vec = current_wrd_vec
-                
-                sim_to_p_wrd_list.append(sim_to_p_wrd)
-                sim_to_s_wrd_list.append(sim_to_s_wrd)
-                number_of_wrd_list.append(len(passed_wrd_idxs))
-
-            self.sim_to_previous_wrd.append(sim_to_p_wrd_list)
-            self.sim_to_secret_wrd.append(sim_to_s_wrd_list)
-
-            p = failed / (len(passed_wrd)-1) / self.iteration
-            avg_n_of_wrd = sum(number_of_wrd_list) / len(number_of_wrd_list)
-
-            self.prob_of_failure.append(p)
-            self.avg_number_of_wrd.append(avg_n_of_wrd)
-        
-        for i in range(len(self.passed_wrd_list_book)):
-            avg_sim_to_p_wrd = 0
-            avg_sim_to_s_wrd = 0
-            avg_final_sim_to_s_wrd = 0
-
-            for j in range(self.iteration):
-                avg_sim_to_p_wrd += sum(self.sim_to_previous_wrd[i][j]) / len(self.sim_to_previous_wrd[i][j]) / self.iteration
-                avg_sim_to_s_wrd += sum(self.sim_to_secret_wrd[i][j]) / len(self.sim_to_secret_wrd[i][j]) / self.iteration
-                avg_final_sim_to_s_wrd += self.sim_to_secret_wrd[i][j][len(self.sim_to_secret_wrd[i][j])-1] / self.iteration
+            passed_wrd_idxs = []
+            num_of_wrd = []
+            sim_to_p_wrd = []
+            sim_to_s_wrd = []
             
-            self.avg_sim_to_p_wrd.append(avg_sim_to_p_wrd)
-            self.avg_sim_to_s_wrd.append(avg_sim_to_s_wrd)
-            self.avg_final_sim_to_s_wrd.append(avg_final_sim_to_s_wrd)
+            for current_wrd in passed_wrd:
+                current_wrd_idx = self.player.wrds.index(current_wrd)
+                current_wrd_vec = self.wrd_vec_list[current_wrd_idx]
+                sim_to_s_wrd.append(self.get_cos_sim(secret_wrd_vec, current_wrd_vec))
+                sim_to_p_wrd.append(self.get_cos_sim(previous_wrd_vec, current_wrd_vec))
+                
+                if previous_wrd_idx != current_wrd_idx:
+                    failed += 1
+                if not current_wrd_idx in passed_wrd_idxs:
+                    passed_wrd_idxs.append(current_wrd_idx)
+
+                previous_wrd_idx = current_wrd_idx
+                previous_wrd_vec = current_wrd_vec
+
+            self.sim_to_previous_wrd.append(sim_to_p_wrd)
+            self.sim_to_secret_wrd.append(sim_to_s_wrd)
+            num_of_wrd.append(len(passed_wrd_idxs))
+            self.avg_number_of_wrd += len(num_of_wrd) / self.iteration
+
+        self.prob_of_failure = failed / (len(passed_wrd)-1) / self.iteration
+        self.avg_number_of_wrd = sum(num_of_wrd) / len(num_of_wrd)
+
+        for i in range(self.iteration):
+            self.avg_sim_to_p_wrd += (sum(self.sim_to_previous_wrd[i]) - 1) / (len(self.sim_to_previous_wrd[i]) - 1) / self.iteration
+            self.avg_sim_to_s_wrd += (sum(self.sim_to_secret_wrd[i]) - 1) / (len(self.sim_to_secret_wrd[i]) - 1) / self.iteration
+            self.avg_final_sim_to_s_wrd += self.sim_to_secret_wrd[i][len(self.sim_to_secret_wrd[i])-1] / self.iteration
 
     def get_cos_sim(self, v1, v2):
         return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
 
     def main(self):
 
-        for setting in self.setting:
-            truncation = setting[0]
-            mutation_rate = setting[1]
-            mutation_degree = setting[2]
-            self.passed_wrd_list = []
+        for i in range(self.iteration):
+            self.round()
 
-            for i in range(self.iteration):
-                print("----------------------truncation: {}, mutation rate: {}, mutation degree: {}, round: {}-------------------------"
-                .format(truncation, mutation_rate, mutation_degree, i+1))
-                self.round(truncation=truncation, mutation_rate=mutation_rate, mutation_degree=mutation_degree)
-
-            self.passed_wrd_list_book.append(self.passed_wrd_list)
-
-        print(self.passed_wrd_list_book)
         self.evaluate_process()
 
-if __name__ == "__main__":
-    step_n = 50
-    iteration = 18
+        res_list = [self.avg_sim_to_p_wrd, self.avg_sim_to_s_wrd, self.avg_final_sim_to_s_wrd, self.prob_of_failure, self.avg_number_of_wrd]
+        sys.stdout.write(str(res_list))
 
-    test = Test(step_n=step_n, iteration=iteration)
-
-    for i, setting in enumerate(test.setting):
-        print("\n-----------truncation:{}, mutation rate:{}, mutation degree:{}---------------------"
-        .format(setting[0], setting[1], setting[2]))
-        print("average cosine similarity to previous word: {}".format(test.avg_sim_to_p_wrd[i]))
-        print("average cosine similarity to secret word: {}".format(test.avg_sim_to_s_wrd[i]))
-        print("final cosine similarity to secret word: {}".format(test.avg_final_sim_to_s_wrd[i]))
-        print("probability of failure: {}".format(test.prob_of_failure[i]))
-        print("average number of used word: {}".format(test.avg_number_of_wrd[i]))
+if __name__ == "__main__":   
+    test = Test()

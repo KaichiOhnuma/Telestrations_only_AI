@@ -42,7 +42,7 @@ class AI_Player(object):
         :param truncation: float, defaults to 1. 
         :return: str (image file)
         """
-        print(f'sketching by player {self.idx} at round {round_count}....')
+        #print(f'sketching by player {self.idx} at round {round_count}....')
 
         wrd_idx = self.wrds.index(wrd)
         class_vector = one_hot_from_int([wrd_idx], batch_size=1)
@@ -70,7 +70,7 @@ class AI_Player(object):
         :param round_count: int
         :return: str (word)
         """
-        print(f'guessing by player {self.idx} at round {round_count}....')
+        #print(f'guessing by player {self.idx} at round {round_count}....')
 
         wrd_vec_dis = []
         base_vector = np.full(300, 0.0)
@@ -117,4 +117,6 @@ class AI_Player(object):
 # test
 if __name__ == '__main__':
     test = AI_Player(0)
-    print(test.guess("./images/0-1.png", round_count=0, mutation_rate=0, mutation_degree=1))
+    for i in range(20):
+        print(test.guess("./images/0-1.png", round_count=0, mutation_rate=0, mutation_degree=1))
+
