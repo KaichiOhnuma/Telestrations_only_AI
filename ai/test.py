@@ -111,7 +111,7 @@ class Test(object):
             num_of_wrd.append(len(passed_wrd_idxs))
             self.avg_number_of_wrd += len(num_of_wrd) / self.iteration
 
-        self.prob_of_failure = failed / (len(passed_wrd)-1) / self.iteration
+        self.prob_of_failure = failed / (len(self.passed_wrd_list[0])-1) / self.iteration
         self.avg_number_of_wrd = sum(num_of_wrd) / len(num_of_wrd)
 
         for i in range(self.iteration):

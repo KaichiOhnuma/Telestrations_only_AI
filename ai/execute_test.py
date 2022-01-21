@@ -1,5 +1,6 @@
 import subprocess
 import numpy as np
+import time
 
 class Execute_test(object):
     def __init__(self, step_n, iteration, truncation_list, mutation_degree_list, mutation_rate_list, memory_limit_step):
@@ -41,27 +42,31 @@ class Execute_test(object):
 
             memory_limit_iteration = self.memory_limit_step // self.step_n
             section_num, rest_iteration = divmod(self.iteration , memory_limit_iteration)
+            if rest_iteration > 0:
+                section_num += 1
 
-            for i in range(section_num+1):
+            for i in range(section_num):
                 print("truncation: {}, mutation rate: {}, mutation degree: {}, section: {} ...."
                 .format(truncation, mutation_rate, mutation_degree, i+1))
 
-                if i == section_num:
+                if i == section_num - 1 and rest_iteration > 0:
                     res = self.section(rest_iteration, truncation, mutation_degree, mutation_rate)
                 else:
                     res = self.section(memory_limit_iteration, truncation, mutation_degree, mutation_rate)
 
-                avg_sim_to_p_wrd += res[0] / (section_num + 1)
-                avg_sim_to_s_wrd += res[1] / (section_num + 1)
-                avg_final_sim_to_s_wrd += res[2] / (section_num + 1)
-                prob_of_failure += res[3] / (section_num + 1)
-                avg_num_of_wrd += res[4] / (section_num + 1)
+                avg_sim_to_p_wrd += res[0] / section_num
+                avg_sim_to_s_wrd += res[1] / section_num
+                avg_final_sim_to_s_wrd += res[2] / section_num
+                prob_of_failure += res[3] / section_num
+                avg_num_of_wrd += res[4] / section_num
 
             self.avg_sim_to_p_wrd_list.append(avg_sim_to_p_wrd)
             self.avg_sim_to_s_wrd_list.append(avg_sim_to_s_wrd)
             self.avg_final_sim_to_s_wrd_list.append(avg_final_sim_to_s_wrd)
             self.prob_of_failure_list.append(prob_of_failure)
             self.avg_num_of_wrd_list.append(avg_num_of_wrd)
+
+            time.sleep(5)
     
     def str_to_list(self, res_str):
         res_list = res_str.split("[")[1].split("]")[0].split(",")
@@ -100,7 +105,7 @@ if __name__ == "__main__":
     step_n = 50
     iteration = 100
     truncation_list = [0.002, 0.25, 0.5, 0.75, 1]
-    mutation_degree_lsit = [0, 0.5, 1, 1.5, 2, 2.5, 3]
+    mutation_degree_list = [0, 0.5, 1, 1.5, 2, 2.5, 3]
     mutation_rate_list = [1]
-    memory_limit_step = 500
-    main = Execute_test(step_n, iteration, truncation_list, mutation_degree_lsit, mutation_rate_list, memory_limit_step)
+    memory_limit_step = 250
+    main = Execute_test(step_n, iteration, truncation_list, mutation_degree_list, mutation_rate_list, memory_limit_step)
