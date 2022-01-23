@@ -19,7 +19,7 @@ class Execute_test(object):
                     self.setting_list.append([truncation, mutation_degree, mutation_rate])
         
         self.execute()
-        self.save_results('result_data1')
+        self.save_results('result_data2')
         self.print_results()
 
     def execute(self):
@@ -97,7 +97,7 @@ class Execute_test(object):
     def save_results(self, file_name):
         np.savez(file=file_name, avg_sim_to_p_wrd_list=self.avg_sim_to_p_wrd_list, avg_sim_to_s_wrd_list=self.avg_sim_to_s_wrd_list, 
         avg_final_sim_to_s_wrd_list=self.avg_final_sim_to_s_wrd_list, prob_of_failure_list=self.prob_of_failure_list, 
-        avg_num_of_wrd_list=self.avg_num_of_wrd_list)
+        avg_num_of_wrd_list=self.avg_num_of_wrd_list, setting_list=self.setting_list)
 
 
 

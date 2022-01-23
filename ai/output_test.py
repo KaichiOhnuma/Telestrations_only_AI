@@ -1,4 +1,5 @@
 import  sys
+from attrs import setters
 import numpy as np
 
 def start():
@@ -13,12 +14,14 @@ def load_file():
     avg_final_sim_to_s_wrd_list = results_file["avg_final_sim_to_s_wrd_list"]
     prob_of_failure_list = results_file["prob_of_failure_list"]
     avg_num_of_wrd_list = results_file["avg_num_of_wrd_list"]
+    setting_list = results_file["setting_list"]
 
     print(avg_sim_to_p_wrd_list)
     print(avg_sim_to_s_wrd_list)
     print(avg_final_sim_to_s_wrd_list)
     print(prob_of_failure_list)
     print(avg_num_of_wrd_list)
+    print(setting_list)
 
 if __name__ == "__main__":
     load_file()
