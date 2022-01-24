@@ -49,16 +49,23 @@ class Output_data(object):
                     data_list = self.avg_num_of_wrd_list
                     data_list_name = "avg_num_of_wrd_list" 
                 data_list_name += ", mutation rate: " + str(mutation_rate)
-                self.add_data_csv(data_list, data_list_name)
+                self.add_data_csv(data_list, data_list_name, mutation_rate)
 
     def make_csv_file(self):
         with open(self.file_path.replace(".npz", ".csv"), "w+") as f:
             pass
 
-    def add_data_csv(self, data_list, data_list_name):
+    def add_data_csv(self, data_list, data_list_name, mutation_rate):
         output_data = [[truncation] for truncation in self.truncation_list]
+        mutation_rate_idx = self.mutation_rate_list.index(mutation_rate)
+        output_data_list = []
 
         for i, data in enumerate(data_list):
+            case = i % len(self.mutation_rate_list)
+            if case == mutation_rate_idx:
+                output_data_list.append(data)
+            
+        for i, data in enumerate(output_data_list):
             case = i // len(self.mutation_degree_list)
             output_data[case].append(data)
 
@@ -70,4 +77,4 @@ class Output_data(object):
         print(df)
 
 if __name__ == "__main__":
-    output = Output_data("result_data4.npz")
+    output = Output_data("test.npz")
