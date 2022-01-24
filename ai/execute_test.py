@@ -106,8 +106,8 @@ if __name__ == "__main__":
     step_n = 50
     iteration = 100
     truncation_list = [0.002, 0.25, 0.5, 0.75, 1]
-    mutation_degree_list = [0, 0.5, 1, 1.5, 2, 2.5, 3]
-    mutation_rate_list = [1]
-    memory_limit_step = 250
-    file_name = "test.npz"
+    mutation_degree_list = [0.5, 1, 1.5, 2, 2.5, 3]
+    mutation_rate_list = [0.6, 0.8]
+    memory_limit_step = 100
+    file_name = "result_data4.npz"
     main = Execute_test(step_n, iteration, truncation_list, mutation_degree_list, mutation_rate_list, memory_limit_step, file_name)

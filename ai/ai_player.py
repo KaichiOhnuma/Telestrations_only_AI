@@ -55,7 +55,7 @@ class AI_Player(object):
             output = self.gan(noise_vector, class_vector, truncation)
 
         img = convert_to_images(output)
-        img_file = f'C:/Users/kaich/Documents/research/program/Telestrations/ai/images/{self.idx}-{round_count}.png'
+        img_file = f'C:/Users/onuma/Documents/research/program/Telestrations/ai/images/{self.idx}-{round_count}.png'
         img[0].save(img_file, quality=95)
 
         del class_vector, noise_vector, output, img
