@@ -3,12 +3,12 @@ import pandas as pd
 
 class Output_data(object):
     def __init__(self, file_name):
-        self.file_name = file_name
+        self.file_path = "../data/" + file_name
         self.load_file()
         self.output_csv()
 
     def load_file(self):
-        self.results_file = np.load(self.file_name)
+        self.results_file = np.load(self.file_path)
         self.avg_sim_to_p_wrd_list = self.results_file["avg_sim_to_p_wrd_list"]
         self.avg_sim_to_s_wrd_list = self.results_file["avg_sim_to_s_wrd_list"]
         self.avg_final_sim_to_s_wrd_list = self.results_file["avg_final_sim_to_s_wrd_list"]
@@ -52,7 +52,7 @@ class Output_data(object):
                 self.add_data_csv(data_list, data_list_name)
 
     def make_csv_file(self):
-        with open('../data/' + self.file_name.replace(".npz", ".csv"), "w+") as f:
+        with open(self.file_path.replace(".npz", ".csv"), "w+") as f:
             pass
 
     def add_data_csv(self, data_list, data_list_name):
@@ -66,8 +66,8 @@ class Output_data(object):
         columns.extend(self.mutation_degree_list)
         df = pd.DataFrame(output_data, columns=columns)
 
-        df.to_csv("../data/result_data1.csv", mode='a', index=False)
+        df.to_csv(self.file_path.replace(".npz", ".csv"), mode='a', index=False)
         print(df)
 
 if __name__ == "__main__":
-    output = Output_data("result_data1.npz")
+    output = Output_data("test.npz")

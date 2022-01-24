@@ -3,13 +3,14 @@ import numpy as np
 import time
 
 class Execute_test(object):
-    def __init__(self, step_n, iteration, truncation_list, mutation_degree_list, mutation_rate_list, memory_limit_step):
+    def __init__(self, step_n, iteration, truncation_list, mutation_degree_list, mutation_rate_list, memory_limit_step, file_name):
         self.step_n = step_n
         self.iteration = iteration
         self.truncation_list = truncation_list
         self.mutation_degree_list = mutation_degree_list
         self.mutation_rate_list = mutation_rate_list
         self.memory_limit_step = memory_limit_step
+        self.file_path = "../data/" + file_name
 
         self.setting_list = []
         
@@ -19,7 +20,7 @@ class Execute_test(object):
                     self.setting_list.append([truncation, mutation_degree, mutation_rate])
         
         self.execute()
-        self.save_results('result_data2')
+        self.save_results(self.file_path)
         self.print_results()
 
     def execute(self):
@@ -108,4 +109,5 @@ if __name__ == "__main__":
     mutation_degree_list = [0, 0.5, 1, 1.5, 2, 2.5, 3]
     mutation_rate_list = [1]
     memory_limit_step = 250
-    main = Execute_test(step_n, iteration, truncation_list, mutation_degree_list, mutation_rate_list, memory_limit_step)
+    file_name = "test.npz"
+    main = Execute_test(step_n, iteration, truncation_list, mutation_degree_list, mutation_rate_list, memory_limit_step, file_name)
