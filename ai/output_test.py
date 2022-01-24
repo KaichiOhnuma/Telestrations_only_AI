@@ -70,4 +70,4 @@ class Output_data(object):
         print(df)
 
 if __name__ == "__main__":
-    output = Output_data("test.npz")
+    output = Output_data("result_data2.npz")
