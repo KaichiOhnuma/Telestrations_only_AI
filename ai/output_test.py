@@ -7,9 +7,9 @@ class Output_data(object):
     def __init__(self, file_name):
         self.file_path = "../data/" + file_name
         self.load_file()
-        #self.output_csv()
+        self.output_csv()
         #self.make_heat_map(1, 1)
-        self.save_all_heatmap()
+        #self.save_all_heatmap()
 
         # data1 / data2
         #self.save_extend_heatmap(1, 'mean cosine similarity to previous word', 'mean cosine similarity between secret word and finally delivered word')
@@ -155,4 +155,4 @@ class Output_data(object):
 
 
 if __name__ == "__main__":
-    output = Output_data("result_data1.npz")
+    output = Output_data("20220126.npz")

@@ -78,6 +78,7 @@ class Test(object):
         self.avg_final_sim_to_s_wrd = 0
 
         failed = 0
+        num_of_wrd = []
 
 
         for passed_wrd in self.passed_wrd_list:
@@ -88,7 +89,6 @@ class Test(object):
             previous_wrd_idx = secret_wrd_idx
 
             passed_wrd_idxs = []
-            num_of_wrd = []
             sim_to_p_wrd = []
             sim_to_s_wrd = []
             
@@ -109,8 +109,7 @@ class Test(object):
             self.sim_to_previous_wrd.append(sim_to_p_wrd)
             self.sim_to_secret_wrd.append(sim_to_s_wrd)
             num_of_wrd.append(len(passed_wrd_idxs))
-            self.avg_number_of_wrd += len(num_of_wrd) / self.iteration
-
+        
         self.prob_of_failure = failed / (len(self.passed_wrd_list[0])-1) / self.iteration
         self.avg_number_of_wrd = sum(num_of_wrd) / len(num_of_wrd)
 

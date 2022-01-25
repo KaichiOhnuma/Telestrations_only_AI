@@ -20,8 +20,8 @@ class Execute_test(object):
                     self.setting_list.append([truncation, mutation_degree, mutation_rate])
         
         self.execute()
-        self.save_results(self.file_path)
         self.print_results()
+        self.save_results(self.file_path)
 
     def execute(self):
         self.avg_sim_to_p_wrd_list = []
@@ -67,6 +67,12 @@ class Execute_test(object):
             self.prob_of_failure_list.append(prob_of_failure)
             self.avg_num_of_wrd_list.append(avg_num_of_wrd)
 
+            print(avg_sim_to_p_wrd)
+            print(avg_sim_to_s_wrd)
+            print(avg_final_sim_to_s_wrd)
+            print(prob_of_failure)
+            print(avg_num_of_wrd)
+
             time.sleep(5)
     
     def str_to_list(self, res_str):
@@ -108,6 +114,11 @@ if __name__ == "__main__":
     truncation_list = [0.002, 0.25, 0.5, 0.75, 1]
     mutation_degree_list = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
     mutation_rate_list = [0.2, 0.4]
+    step_n = 4
+    iteration = 2
+    truncation_list = [1]
+    mutation_degree_list = [2.5, 2.0]
+    mutation_rate_list = [1]
     memory_limit_step = 250
-    file_name = "result_data3.npz"
+    file_name = "20220126.npz"
     main = Execute_test(step_n, iteration, truncation_list, mutation_degree_list, mutation_rate_list, memory_limit_step, file_name)
