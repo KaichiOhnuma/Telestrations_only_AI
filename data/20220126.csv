@@ -1,0 +1,10 @@
+"avg_sim_to_p_wrd, mutation rate: 1.0",2.5,2.0
+1.0,0.218513263505843,0.5652096700666287
+"avg_sim_to_s_wrd, mutation rate: 1.0",2.5,2.0
+1.0,0.21255252876066083,0.29015193434679076
+"avg_final_sim_to_s_wrd, mutation rate: 1.0",2.5,2.0
+1.0,0.13057122944557636,0.26641440023614665
+"prob_of_failure_list, mutation rate: 1.0",2.5,2.0
+1.0,1.0,0.75
+"avg_num_of_wrd_list, mutation rate: 1.0",2.5,2.0
+1.0,3.0,2.5
