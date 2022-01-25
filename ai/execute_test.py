@@ -103,8 +103,8 @@ class Execute_test(object):
 
 
 if __name__ == "__main__":
-    step_n = 2
-    iteration = 1
+    step_n = 50
+    iteration = 100
     truncation_list = [0.002, 0.25, 0.5, 0.75, 1]
     mutation_degree_list = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
     mutation_rate_list = [0.2, 0.4]
