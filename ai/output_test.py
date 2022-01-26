@@ -155,4 +155,4 @@ class Output_data(object):
 
 
 if __name__ == "__main__":
-    output = Output_data("20220126.npz")
+    output = Output_data("20220125.npz")

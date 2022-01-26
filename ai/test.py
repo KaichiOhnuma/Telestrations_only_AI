@@ -6,6 +6,8 @@ from ai_player import AI_Player
 
 import numpy as np
 import sys
+import tkinter as tk
+from PIL import Image, ImageTk
 
 class Test(object):
     def __init__(self):
@@ -28,6 +30,7 @@ class Test(object):
         self.wrd_vec_list = wrd_vec_file["wrd_vec_list"]
 
         self.main()
+        #self.display_test(0.25, 0, 1, 32)
 
     def round(self):
         """
@@ -130,6 +133,67 @@ class Test(object):
 
         res_list = [self.avg_sim_to_p_wrd, self.avg_sim_to_s_wrd, self.avg_final_sim_to_s_wrd, self.prob_of_failure, self.avg_number_of_wrd]
         sys.stdout.write(str(res_list))
+
+    def display_test(self, truncation, mutation_degree, mutation_rate, step_n):
+        sketch_book = []
+
+        with open('imagenet_classes.txt') as f:
+            wrds = [line.strip() for line in f.readlines()]
+
+        secret_wrd_idx = np.random.randint(0, 1000)
+        while secret_wrd_idx in self.unavailable_wrd_idxs:
+            secret_wrd_idx = np.random.randint(0, 1000)
+        sketch_book.append(wrds[secret_wrd_idx])
+
+        for i in range(step_n):
+            # sketch turn
+            if i % 2 == 0:
+                sketch = self.player.sketch(sketch_book[i], round_count=i+1, truncation=truncation)
+                sketch_book.append(sketch)
+
+            # guess turn
+            else:
+                guess = self.player.guess(sketch_book[i], round_count=i+1, mutation_rate=mutation_rate, mutation_degree=mutation_degree)
+                sketch_book.append(guess)
+
+        print(sketch_book)
+        self.draw(sketch_book)
+
+    def draw(self, sketch_book):
+        baseGround = tk.Tk()
+        baseGround.geometry('1250x600')
+        imgs = []
+
+        for i in range(len(sketch_book)):
+            if i != 0:
+                arrow = tk.Label(text='→', font=("MSゴシック", '20', 'bold'))
+                arrow_x = (i % 6) * 200 + 15
+                arrow_y = (i // 6) * 150 + 60
+                arrow.place(x=arrow_x, y=arrow_y)
+
+        for i, data in enumerate(sketch_book):
+            if i % 2 == 0:
+                data_x = (i % 6) * 200 + 50
+                data_y = (i // 6) * 150
+                data = data.split(',')[0]
+                #data = tk.Label(text=data, font=('MSゴシック', '15', 'bold'))
+                #data.place(x=data_x, y=data_y)
+                canvas = tk.Canvas(bg='white', width=150, height=150)
+                canvas.place(x=data_x, y=data_y)
+                canvas.create_text(75,75,text=data, anchor='center', font=('MSゴシック', '15', 'bold'))
+            else:
+                data_x = (i % 6) * 200 + 50
+                data_y = (i // 6) * 150 
+                img = Image.open(open(data, 'rb'))
+                img.thumbnail((150, 150), Image.ANTIALIAS)
+                img = ImageTk.PhotoImage(img)
+                imgs.append(img)
+                canvas = tk.Canvas(bg='white', width=150, height=150)
+                canvas.place(x=data_x, y=data_y)
+                canvas.create_image(0,0,image=img, anchor = tk.NW)
+            
+
+        baseGround.mainloop()
 
 if __name__ == "__main__":   
     test = Test()

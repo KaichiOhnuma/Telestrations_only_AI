@@ -111,9 +111,9 @@ class Execute_test(object):
 if __name__ == "__main__":
     step_n = 50
     iteration = 100
-    truncation_list = [0.002, 0.25, 0.5, 0.75, 1]
-    mutation_degree_list = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
-    mutation_rate_list = [0.2, 0.4]
-    memory_limit_step = 250
-    file_name = "20220126.npz"
+    truncation_list = [0.25]
+    mutation_degree_list = [0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
+    mutation_rate_list = [1.0]
+    memory_limit_step = 100
+    file_name = "20220125.npz"
     main = Execute_test(step_n, iteration, truncation_list, mutation_degree_list, mutation_rate_list, memory_limit_step, file_name)
