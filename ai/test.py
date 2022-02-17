@@ -29,8 +29,8 @@ class Test(object):
         self.unavailable_wrd_idxs = wrd_vec_file["unavailable_wrd_idxs"]
         self.wrd_vec_list = wrd_vec_file["wrd_vec_list"]
 
-        self.main()
-        #self.display_test(0.25, 0, 1, 32)
+        #self.main()
+        self.display_test(0.75, 3, 1, 32)
 
     def round(self):
         """

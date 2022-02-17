@@ -117,6 +117,5 @@ class AI_Player(object):
 # test
 if __name__ == '__main__':
     test = AI_Player(0)
-    for i in range(20):
-        print(test.guess("./images/0-1.png", round_count=0, mutation_rate=0, mutation_degree=1))
+    print(test.sketch("tennis ball", 3, 0.002))
 

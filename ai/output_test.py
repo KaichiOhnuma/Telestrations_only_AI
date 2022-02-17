@@ -7,11 +7,11 @@ class Output_data(object):
     def __init__(self, file_name):
         self.file_path = "../data/" + file_name
         self.load_file()
-        self.output_csv()
+        #self.output_csv()
         #self.make_heat_map(1, 1)
-        #self.save_all_heatmap()
+        self.save_all_heatmap()
 
-        # data1 / data2
+        # data1 - data2
         #self.save_extend_heatmap(1, 'mean cosine similarity to previous word', 'mean cosine similarity between secret word and finally delivered word')
 
     def load_file(self):
@@ -27,7 +27,10 @@ class Output_data(object):
         self.mutation_degree_list = []
         self.mutation_rate_list = []
 
+        self.prob_of_failure_list = 1 - self.prob_of_failure_list
+
         for setting in self.setting_list:
+            setting[0] *= 2
             if not setting[0] in self.truncation_list:
                 self.truncation_list.append(setting[0])
             if not setting[1] in self.mutation_degree_list:
@@ -142,7 +145,7 @@ class Output_data(object):
     def save_extend_heatmap(self, mutation_rate, data1_name, data2_name):
         df = self.make_heatmap_data()
         df = df.loc[df['add noise rate'] == mutation_rate]
-        df[data1_name] /= df[data2_name]
+        df[data1_name] -= df[data2_name]
 
         output = df.pivot('threshold', '$\u03b1$', data1_name)
         data_name = data1_name + "per" + data2_name
@@ -155,4 +158,4 @@ class Output_data(object):
 
 
 if __name__ == "__main__":
-    output = Output_data("20220125.npz")
+    output = Output_data("20220127.npz")
