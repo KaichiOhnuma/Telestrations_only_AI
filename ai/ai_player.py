@@ -49,12 +49,12 @@ class AI_Player(object):
                 else:
                     self.wrd_dict[wrd] = {"id": i, "vector": None}
 
-    def sketch(self, wrd, round_count, truncation=1.):
+    def sketch(self, wrd, round_count, truncation=2.):
         """
         sketch from the word
         :param wrd: str
         :param round_count: int
-        :param truncation: float, defaults to 1. 
+        :param truncation: float, defaults to 2. 
         :return: str (image file)
         """
         #print(f'sketching by player {self.idx} at round {round_count}....')
@@ -65,6 +65,8 @@ class AI_Player(object):
         
         noise_vector = truncated_noise_sample(truncation=truncation, batch_size=1)
         noise_vector = torch.from_numpy(noise_vector)
+
+        truncation = truncation / 2
 
         with torch.no_grad():
             output = self.gan(noise_vector, class_vector, truncation)
@@ -129,6 +131,7 @@ class AI_Player(object):
         
 # test
 if __name__ == '__main__':
-    test = AI_Player(0).guess("./images/0-35.png", round_count=0, noise_rate=0, noise_degree=0)
+    test = AI_Player(0)
+    test.sketch("hen", 0, truncation=0.04)
     print(test)
 
