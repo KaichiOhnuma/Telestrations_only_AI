@@ -23,6 +23,11 @@ class AI_Player(object):
         self.classifier = models.resnet152(pretrained=True)
         self.classifier.eval()
 
+        if torch.cuda.is_available():
+            print("k")
+            self.gan.to("cuda")
+            self.classifier.to("cuda")
+
         self.transform = transforms.Compose([
             transforms.Resize(224),
             transforms.CenterCrop(224),
@@ -32,16 +37,17 @@ class AI_Player(object):
 
         self.wrd_dict = {}
 
+        wrd_vec_file = np.load("word_vector.npz")
+        wrd_vec_list = wrd_vec_file["wrd_vec_list"]
+        self.unavailable_wrd_ids = wrd_vec_file["unavailable_wrd_idxs"]
+
         with open('imagenet_classes.txt') as f:
             for i, line in enumerate(f.readlines()):
                 wrd = line.replace("\n", "")
-                self.wrd_dict[wrd] = {"id": i, "vector": None}
-
-        wrd_vec_file = np.load("word_vector.npz")
-        self.unavailable_wrd_ids = wrd_vec_file["unavailable_wrd_idxs"]
-        for i, vec in enumerate(wrd_vec_file["wrd_vec_list"]):
-            if not i in self.unavailable_wrd_ids:
-                self.wrd_dict[i]["vector"] = vec
+                if not i in self.unavailable_wrd_ids:
+                    self.wrd_dict[wrd] = {"id": i, "vector": wrd_vec_list[i]}
+                else:
+                    self.wrd_dict[wrd] = {"id": i, "vector": None}
 
     def sketch(self, wrd, round_count, truncation=1.):
         """
@@ -62,9 +68,10 @@ class AI_Player(object):
 
         with torch.no_grad():
             output = self.gan(noise_vector, class_vector, truncation)
+        output = output.to("cpu")
 
         img = convert_to_images(output)
-        img_path = f'C:/Users/kaich/Documents/research/program/Telestrations_only_AI/ai/images/{self.idx}-{round_count}.png'
+        img_path = f'C:/Users/onuma/Documents/research/code/Telestrations_only_AI/ai/images/{self.id}-{round_count}.png'
         img[0].save(img_path, quality=95)
 
         del class_vector, noise_vector, output, img
@@ -72,7 +79,7 @@ class AI_Player(object):
 
         return img_path
 
-    def guess(self, img_path, round_count, noise_rate, noise_degree):
+    def guess(self, img_path, noise_rate, noise_degree):
         """
         guess the image
         :param img_file: str
@@ -94,33 +101,34 @@ class AI_Player(object):
         #_, rank_idxs = torch.sort(classification, descending=True)
 
         for val in self.wrd_dict.values():
-            if not val["vector"]:
-                base_vector += val["vector"] * percentages[val["id"]]
+            if not val["vector"] is None:
+                base_vector += val["vector"] * percentages[val["id"]].item()
 
-        base_vector = self.mutation(base_vector, noise_rate, noise_degree)
+        base_vector = self.add_noise(base_vector, noise_rate, noise_degree)
 
-        min_dis = None
+        max_dis = None
         for key, val in self.wrd_dict.items():
             if not val["id"] in self.unavailable_wrd_ids:
                 dis =  np.dot(base_vector, val["vector"]) / (np.linalg.norm(base_vector) * np.linalg.norm(val["vector"]))
-                if (not min_dis) or (min_dis > dis):
+                if max_dis is None or max_dis < dis:
                     res_wrd = key
-                    min_dis = dis
+                    max_dis = dis
 
         del base_vector, img, classification, unavailable_wrd_score, percentages
         gc.collect()
 
         return res_wrd
     
-    def mutation(self, vec, noise_rate, noise_degree):
-        mutation = [True, False]
-        if np.random.choice(mutation, p=[noise_rate, 1-noise_rate]):
-            mutation_vec = 2 * noise_degree * np.random.rand(len(vec)) - noise_degree
-            vec += mutation_vec
+    def add_noise(self, vec, noise_rate, noise_degree):
+        is_add_noise = [True, False]
+        if np.random.choice(is_add_noise, p=[noise_rate, 1-noise_rate]):
+            noise_vec = 2 * noise_degree * np.random.rand(len(vec)) - noise_degree
+            vec += noise_vec
 
         return vec
         
 # test
 if __name__ == '__main__':
-    test = AI_Player(0).sketch("cock", 0)
+    test = AI_Player(0).guess("./images/0-35.png", round_count=0, noise_rate=0, noise_degree=0)
+    print(test)
 

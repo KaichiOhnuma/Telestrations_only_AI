@@ -19,18 +19,17 @@ class Test(object):
         self.step_n = int(input("step_n: "))
         self.iteration = int(input("iteration: "))
         self.truncation = float(input("truncation: "))
-        self.mutation_degree = float(input("mutation degree: "))
-        self.mutation_rate = float(input("mutation rate: "))
+        self.noise_degree = float(input("noise degree: "))
+        self.noise_rate = float(input("noise rate: "))
 
         self.player = AI_Player(0)
         self.passed_wrd_list = []
 
-        wrd_vec_file = np.load("word_vector.npz")
-        self.unavailable_wrd_idxs = wrd_vec_file["unavailable_wrd_idxs"]
-        self.wrd_vec_list = wrd_vec_file["wrd_vec_list"]
-
-        #self.main()
-        self.display_test(0.75, 3, 1, 32)
+        #wrd_vec_file = np.load("word_vector.npz")
+        #self.unavailable_wrd_idxs = wrd_vec_file["unavailable_wrd_idxs"]
+        #self.wrd_vec_list = wrd_vec_file["wrd_vec_list"]
+        self.main()
+        #self.display_test(0.75, 3, 1, 32)
 
     def round(self):
         """
@@ -50,7 +49,7 @@ class Test(object):
 
             # guess turn
             else:
-                guess = self.player.guess(self.sketch_book[i], round_count=i+1, mutation_rate=self.mutation_rate, mutation_degree=self.mutation_degree)
+                guess = self.player.guess(self.sketch_book[i], noise_rate=self.noise_rate, noise_degree=self.noise_degree)
                 self.sketch_book.append(guess)
                 self.passed_wrd.append(guess)
 
@@ -64,7 +63,7 @@ class Test(object):
             wrds = [line.strip() for line in f.readlines()]
 
         secret_wrd_idx = np.random.randint(0, 1000)
-        while secret_wrd_idx in self.unavailable_wrd_idxs:
+        while secret_wrd_idx in self.player.unavailable_wrd_ids:
             secret_wrd_idx = np.random.randint(0, 1000)
 
         self.sketch_book.append(wrds[secret_wrd_idx])
@@ -121,6 +120,15 @@ class Test(object):
             self.avg_sim_to_s_wrd += (sum(self.sim_to_secret_wrd[i]) - 1) / (len(self.sim_to_secret_wrd[i]) - 1) / self.iteration
             self.avg_final_sim_to_s_wrd += self.sim_to_secret_wrd[i][len(self.sim_to_secret_wrd[i])-1] / self.iteration
 
+    def evaluate_process2(self):
+        sim_to_secret_word = np.zeros(len(self.passed_wrd_list[0]))
+        for passed_wrd in self.passed_wrd_list:
+            for i, wrd in enumerate(passed_wrd):
+                sim_to_secret_word[i] += self.get_cos_sim(self.player.wrd_dict[wrd]["vector"], self.player.wrd_dict[passed_wrd[0]]["vector"])
+        sim_to_secret_word = sim_to_secret_word / len(self.passed_wrd_list)
+
+        return sim_to_secret_word
+
     def get_cos_sim(self, v1, v2):
         return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
 
@@ -128,11 +136,10 @@ class Test(object):
 
         for i in range(self.iteration):
             self.round()
+            #print(f"round : {i} ...")
 
-        self.evaluate_process()
-
-        res_list = [self.avg_sim_to_p_wrd, self.avg_sim_to_s_wrd, self.avg_final_sim_to_s_wrd, self.prob_of_failure, self.avg_number_of_wrd]
-        sys.stdout.write(str(res_list))
+        sim_to_secret_word = self.evaluate_process2()
+        sys.stdout.write(str(sim_to_secret_word))
 
     def display_test(self, truncation, mutation_degree, mutation_rate, step_n):
         sketch_book = []

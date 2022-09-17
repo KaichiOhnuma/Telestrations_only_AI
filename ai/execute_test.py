@@ -1,6 +1,7 @@
 import subprocess
 import numpy as np
 import time
+import matplotlib.pyplot as plt
 
 class Execute_test(object):
     def __init__(self, step_n, iteration, truncation_list, mutation_degree_list, mutation_rate_list, memory_limit_step, file_name):
@@ -19,9 +20,16 @@ class Execute_test(object):
                 for mutation_rate in self.mutation_rate_list:
                     self.setting_list.append([truncation, mutation_degree, mutation_rate])
         
-        self.execute()
-        self.print_results()
-        self.save_results(self.file_path)
+        self.fig = plt.figure()
+        self.ax1 = self.fig.add_subplot(1, 1, 1)
+        self.ax1.set_xlabel("time")
+        self.ax1.set_ylabel("cosine similarity")
+        
+        self.execute2()
+        #self.print_results()
+        #self.save_results(self.file_path)
+        self.ax1.legend()
+        plt.show()
 
     def execute(self):
         self.avg_sim_to_p_wrd_list = []
@@ -74,13 +82,39 @@ class Execute_test(object):
             print(avg_num_of_wrd)
 
             time.sleep(5)
+
+    def execute2(self):
+
+        for setting in self.setting_list:
+            truncation, noise_degree, noise_rate = setting
+            sim_to_secret_word = None
+
+            memory_limit_iteration = self.memory_limit_step // self.step_n
+            section_num, rest_iteration = divmod(self.iteration, memory_limit_iteration)
+            if rest_iteration > 0:
+                section_num += 1
+
+            for i in range(section_num):
+                print(f"truncation: {truncation}, noise rate: {noise_rate}, noise degree: {noise_degree}, section: {i+1} ...")
+                if i == section_num -1 and rest_iteration > 0:
+                    res = self.section(rest_iteration, truncation, noise_degree, noise_rate)
+                else:
+                    res = self.section(memory_limit_iteration, truncation, noise_degree, noise_rate)
+                if sim_to_secret_word is None:
+                    sim_to_secret_word = res / section_num
+                else:
+                    sim_to_secret_word += res / section_num
+            
+            t = [i for i in range(len(sim_to_secret_word))]
+            self.ax1.plot(t, sim_to_secret_word, label=f"truncation:{truncation*2}, noise:{noise_degree}")
+
     
     def str_to_list(self, res_str):
-        res_list = res_str.split("[")[1].split("]")[0].split(",")
+        res_list = res_str.split("[")[1].split("]")[0].split()
         for i in range(len(res_list)):
             res_list[i] = float(res_list[i])
         
-        return res_list
+        return np.array(res_list)
     
     def section(self, iteration, truncation, mutation_degree, mutation_rate):
         stdin = str(self.step_n) + "\n" + str(iteration) + "\n" + str(truncation) + "\n" + str(mutation_degree) + "\n" + str(mutation_rate)
@@ -108,12 +142,14 @@ class Execute_test(object):
 
 
 
+
+
 if __name__ == "__main__":
     step_n = 50
-    iteration = 100
-    truncation_list = [0.25]
+    iteration = 50
+    truncation_list = [0.002, 0.25, 0.5, 0.75, 1.0]
     mutation_degree_list = [0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
     mutation_rate_list = [1.0]
-    memory_limit_step = 100
-    file_name = "20220125.npz"
+    memory_limit_step = 500
+    file_name = "20220621.npz"
     main = Execute_test(step_n, iteration, truncation_list, mutation_degree_list, mutation_rate_list, memory_limit_step, file_name)
