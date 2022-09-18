@@ -49,7 +49,7 @@ class AI_Player(object):
                 else:
                     self.wrd_dict[wrd] = {"id": i, "vector": None}
 
-    def sketch(self, wrd, round_count, truncation=2.):
+    def sketch(self, wrd, round_count, truncation, noise_degree, iter):
         """
         sketch from the word
         :param wrd: str
@@ -73,7 +73,7 @@ class AI_Player(object):
         output = output.to("cpu")
 
         img = convert_to_images(output)
-        img_path = f'C:/Users/onuma/Documents/research/code/Telestrations_only_AI/ai/images/{self.id}-{round_count}.png'
+        img_path = f'C:/Users/onuma/Documents/research/code/Telestrations_only_AI/ai/images/{self.id}-{iter}-{truncation}-{noise_degree}-{round_count}.png'
         img[0].save(img_path, quality=95)
 
         del class_vector, noise_vector, output, img
