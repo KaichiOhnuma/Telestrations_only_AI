@@ -1,19 +1,20 @@
-from distutils.util import execute
+import numpy as np
 import itertools
 import subprocess
+import os
 
 from experiment import Experiment
 
 
 class Execute_Experiment(object):
-    def __init__(self, truncations, noise_degrees, noise_rates, step_num, iteration, memory_limit_step, output_path):
+    def __init__(self, truncations, noise_degrees, noise_rates, step_num, iteration, memory_limit_step, output):
         self.truncations = truncations
         self.noise_degrees = noise_degrees
         self.noise_rates = noise_rates
         self.step_num = step_num
         self.iteration = iteration
         self.memory_limit_step = memory_limit_step
-        self.output_path = output_path
+        self.output = output
 
         self.memory_limit_iteration = self.memory_limit_step // self.step_num
         self.iter_num, self.rest_iter_num = divmod(self.iteration, self.memory_limit_iteration)
@@ -30,7 +31,9 @@ class Execute_Experiment(object):
             if self.rest_iter_num:
                 case_res = self.execute(truncation, noise_degree, noise_rate, self.rest_iter_num, self.memory_limit_iteration*self.iter_num)
                 res.extend(case_res)
-            print(res)
+
+            output_path = os.path.join(self.output, f"{truncation}-{noise_degree}.npy")
+            np.save(output_path, np.array(res))
 
         return res
 
@@ -47,22 +50,29 @@ class Execute_Experiment(object):
 
         list_res = []
         str_flag = False
-        sub_list_flag = False
+        quotation_flag = False
 
         for char in res:
             if char == "[":
                 case_res = []
-                sub_list_flag = True
-            elif char == "]" and sub_list_flag:
-                list_res.append(case_res)
-                sub_list_flag = False
-            elif char == "'":
+            elif char == "'" or char == '"':
                 if str_flag:
-                    case_res.append(step_str)
-                    str_flag = False
+                    quotation_flag = True
+                    step_str += char
                 else:
                     step_str = ""
                     str_flag = True
+            elif quotation_flag:
+                if char == ",":
+                    case_res.append(step_str[:-1])
+                    str_flag = False
+                elif char == "]":
+                    case_res.append(step_str[:-1])
+                    list_res.append(case_res)
+                    str_flag = False
+                else:
+                    step_str += char
+                quotation_flag = False
             elif str_flag:
                 step_str += char
 
@@ -77,10 +87,10 @@ if __name__ == "__main__":
     noise_rates = [1]
 
     step_num = 50
-    iteration = 6
+    iteration = 50
 
-    memory_limit_step = 150
+    memory_limit_step = 500
 
-    output_path = "20220917.npz"
+    output = "../data/20220918"
 
-    experiment = Execute_Experiment(truncations, noise_degrees, noise_rates, step_num, iteration, memory_limit_step, output_path)
+    experiment = Execute_Experiment(truncations, noise_degrees, noise_rates, step_num, iteration, memory_limit_step, output)

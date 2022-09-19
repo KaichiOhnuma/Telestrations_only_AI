@@ -27,7 +27,7 @@ class Experiment(object):
 
     def conduct(self):
         res = []
-        for iter in tqdm(range(self.iteration)):
+        for iter in range(self.iteration):
             section_res = []
             section_res.append(self.make_secret_wrd())
             for step in range(self.step_num):
