@@ -30,19 +30,27 @@ class Analyzer(object):
         self.ax1.set_ylabel("cosine similarity")
         # self.ax1.set_ylim(-0.2, 1.1)
 
-    def plot_data(self, data, truncation, noise_degree):
+    def plot_data(self, data, truncation, noise_degree, color_barometer):
         step = [i for i in range(len(data))]
         # self.ax1.plot(step, data, label=f"pic:{truncation}, wrd:{noise_degree}", color=cm.jet(truncation/self.truncations[-1]))
         # self.ax1.plot(step, data, label=f"pic:{truncation}, wrd:{noise_degree}", color=cm.jet(noise_degree/self.noise_degrees[-1]))
-        self.ax1.plot(step, data, label=f"img:{truncation}, wrd:{noise_degree}")
+        # self.ax1.plot(step, data, label=f"img:{truncation}, wrd:{noise_degree}")
+        self.ax1.plot(step, data, label=f"img:{truncation}, wrd:{noise_degree}", color=cm.jet(color_barometer))
+
     
     def analysis_manage(self, data_path):
         for truncation, noise_degree in itertools.product(self.truncations, self.noise_degrees):
             data = self.load_data(data_path, truncation, noise_degree)
+            success_rate, single_sim, final_sim, sim_ratio = self.make_heatmap_data(data)
             case_res = self.align_data(data)
-            self.plot_data(case_res, truncation, noise_degree)
+            self.plot_data(case_res, truncation, noise_degree, single_sim)
         plt.legend(bbox_to_anchor=(1, 1), loc="upper left", borderaxespad=0, fontsize=10)
         plt.show()
+
+    def show_ex(self, data_path, truncation, noise_degree, idx):
+        data = self.load_data(data_path, truncation, noise_degree)
+        data = data[idx]
+        print(data)
 
     def make_heatmap(self, data_path):
         df = []
@@ -133,6 +141,7 @@ if __name__ == "__main__":
     data_path = "../data/20220918"
 
     analyzer = Analyzer(truncations, noise_degrees)
-    #analyzer.analysis_manage(data_path)
-    analyzer.make_heatmap(data_path)
+    # analyzer.analysis_manage(data_path)
+    # analyzer.make_heatmap(data_path)
+    analyzer.show_ex(data_path, 0.5, 1.5, 0)
     
