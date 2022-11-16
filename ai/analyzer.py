@@ -43,14 +43,15 @@ class Analyzer(object):
             data = self.load_data(data_path, truncation, noise_degree)
             success_rate, single_sim, final_sim, sim_ratio = self.make_heatmap_data(data)
             case_res = self.align_data(data)
-            self.plot_data(case_res, truncation, noise_degree, single_sim)
-        plt.legend(bbox_to_anchor=(1, 1), loc="upper left", borderaxespad=0, fontsize=10)
-        plt.show()
+            self.plot_data(case_res, truncation, noise_degree, single_sim/final_sim/5)
+        # plt.legend(bbox_to_anchor=(1, 1), loc="upper left", borderaxespad=0, fontsize=10)
+        output_path = os.path.join(data_path, "sim_transition.png")
+        plt.savefig(output_path)
+        # plt.show()
 
     def show_ex(self, data_path, truncation, noise_degree, idx):
         data = self.load_data(data_path, truncation, noise_degree)
         data = data[idx]
-        print(data)
 
     def make_heatmap(self, data_path):
         df = []
@@ -74,7 +75,7 @@ class Analyzer(object):
         for i, hm in enumerate(heatmaps):
             plt.figure(figsize=(7,4))
             heatmap = sns.heatmap(hm, annot=True, cmap="coolwarm", fmt="1.2f")
-            output_path = os.path.join(data_path, str(i)+".png")
+            output_path = os.path.join(data_path, df_columns[i+2]+".png")
             plt.savefig(output_path)
 
 
@@ -135,13 +136,13 @@ class Analyzer(object):
 
 
 if __name__ == "__main__":
-    truncations = [0.004, 0.5, 1.0, 1.5, 2.0]
+    truncations = [0.004, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
     noise_degrees = [0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
 
-    data_path = "../data/20220918"
+    data_path = "../data/20220924"
 
     analyzer = Analyzer(truncations, noise_degrees)
-    # analyzer.analysis_manage(data_path)
+    analyzer.analysis_manage(data_path)
     # analyzer.make_heatmap(data_path)
-    analyzer.show_ex(data_path, 0.5, 1.5, 0)
+    # analyzer.show_ex(data_path, 0.5, 1.5, 0)
     

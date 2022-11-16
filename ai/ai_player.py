@@ -7,6 +7,7 @@ from torchvision import models, transforms
 import torch
 from PIL import Image
 import gc
+import os
 
 class AI_Player(object):
     def __init__(self, id):
@@ -23,10 +24,9 @@ class AI_Player(object):
         self.classifier = models.resnet152(pretrained=True)
         self.classifier.eval()
 
-        if torch.cuda.is_available():
-            print("k")
-            self.gan.to("cuda")
-            self.classifier.to("cuda")
+        assert torch.cuda.is_available()
+        self.gan.to("cuda")
+        # self.classifier.to("cuda")
 
         self.transform = transforms.Compose([
             transforms.Resize(224),
@@ -49,7 +49,7 @@ class AI_Player(object):
                 else:
                     self.wrd_dict[wrd] = {"id": i, "vector": None}
 
-    def sketch(self, wrd, round_count, truncation, noise_degree, iter):
+    def sketch(self, wrd, round_count, truncation, noise_degree, iter, output_path, seed=None):
         """
         sketch from the word
         :param wrd: str
@@ -62,18 +62,24 @@ class AI_Player(object):
         wrd_id = self.wrd_dict[wrd]["id"]
         class_vector = one_hot_from_int([wrd_id], batch_size=1)
         class_vector = torch.from_numpy(class_vector)
-        
-        noise_vector = truncated_noise_sample(truncation=truncation, batch_size=1)
-        noise_vector = torch.from_numpy(noise_vector)
+        class_vector = class_vector.to("cuda")
 
-        truncation = truncation / 2
+        truncation /= 2
+        
+        noise_vector = truncated_noise_sample(truncation=truncation, batch_size=1, seed=seed)
+        noise_vector = torch.from_numpy(noise_vector)
+        noise_vector = noise_vector.to("cuda")
+
+        # batch_norm_truncation = truncation if truncation <= 1 else 1
+        batch_norm_truncation = 1 # 値が大きいと色の濃淡がより分かれる
 
         with torch.no_grad():
-            output = self.gan(noise_vector, class_vector, truncation)
+            output = self.gan(noise_vector, class_vector, truncation=batch_norm_truncation)
         output = output.to("cpu")
 
         img = convert_to_images(output)
-        img_path = f'C:/Users/onuma/Documents/research/code/Telestrations_only_AI/ai/images/{self.id}-{truncation*2}-{noise_degree}-{iter}-{round_count}.png'
+        img_path = os.path.join(output_path, f"images/{self.id}-{truncation*2}-{noise_degree}-{iter}-{round_count}.png")
+        # img_path = f'C:/Users/onuma/Documents/research/code/Telestrations_only_AI/ai/images/{self.id}-{truncation*2}-{noise_degree}-{iter}-{round_count}.png'
         img[0].save(img_path, quality=95)
 
         del class_vector, noise_vector, output, img
@@ -93,8 +99,10 @@ class AI_Player(object):
 
         img = Image.open(img_path)
         img = self.transform(img)
+        # img = img.to("cuda")
         
         classification = self.classifier(img.unsqueeze(0))
+        # classification = classification.to("cpu")
         unavailable_wrd_score = torch.min(classification)
         for unavailable_wrd_idx in self.unavailable_wrd_ids:
             classification[0 ,unavailable_wrd_idx] = unavailable_wrd_score
@@ -132,6 +140,9 @@ class AI_Player(object):
 # test
 if __name__ == '__main__':
     test = AI_Player(0)
-    test.sketch("hen", 0, truncation=0.04)
-    print(test)
-
+    seed = 1500
+    wrd = "pug, pug-dog"
+    output_path = "../data/20220927"
+    truncations = [0.04, 1.0, 2.0, 3.0, 4.0]
+    for truncation in truncations:
+        test.sketch(wrd, 0, truncation, 0, seed, output_path, seed)

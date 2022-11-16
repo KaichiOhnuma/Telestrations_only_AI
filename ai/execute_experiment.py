@@ -29,6 +29,7 @@ class Execute_Experiment(object):
                 case_res = self.execute(truncation, noise_degree, noise_rate, self.memory_limit_iteration, self.memory_limit_iteration*iter)
                 res.extend(case_res)
             if self.rest_iter_num:
+                print(f"--------------------trun: {truncation}, noise: {noise_degree}, iter: {self.iter_num}---------------------------")
                 case_res = self.execute(truncation, noise_degree, noise_rate, self.rest_iter_num, self.memory_limit_iteration*self.iter_num)
                 res.extend(case_res)
 
@@ -38,7 +39,7 @@ class Execute_Experiment(object):
         return res
 
     def execute(self, truncation, noise_degree, noise_rate, iteration, iter_count):
-        stdin = str(truncation) + "\n" + str(noise_degree) + "\n" + str(noise_rate) + "\n" + str(iteration) + "\n" + str(iter_count)
+        stdin = str(truncation) + "\n" + str(noise_degree) + "\n" + str(noise_rate) + "\n" + str(iteration) + "\n" + str(iter_count) + "\n" + self.output
         stdin = stdin.encode()
         res = subprocess.run(["python", "experiment.py"], input=stdin, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         res = self.read_res(res)
@@ -82,7 +83,7 @@ class Execute_Experiment(object):
 
 
 if __name__ == "__main__":
-    truncations = [0.004, 0.5, 1.0, 1.5, 2.0]
+    truncations = [0.004, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
     noise_degrees = [0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
     noise_rates = [1]
 
@@ -91,6 +92,6 @@ if __name__ == "__main__":
 
     memory_limit_step = 500
 
-    output = "../data/20220918"
+    output = "../data/20220924"
 
     experiment = Execute_Experiment(truncations, noise_degrees, noise_rates, step_num, iteration, memory_limit_step, output)

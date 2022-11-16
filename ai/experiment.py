@@ -5,13 +5,14 @@ from tqdm import tqdm
 from ai_player import AI_Player
 
 class Experiment(object):
-    def __init__(self, truncation, noise_degree, noise_rate, step_num, iteration, iter_count):
+    def __init__(self, truncation, noise_degree, noise_rate, step_num, iteration, iter_count, output_path):
         self.truncation = truncation
         self.noise_degree = noise_degree
         self.noise_rate = noise_rate
         self.step_num = step_num
         self.iteration = iteration
         self.iter_count = iter_count
+        self.output_path = output_path
 
         self.player = AI_Player(0)
 
@@ -32,7 +33,7 @@ class Experiment(object):
             section_res.append(self.make_secret_wrd())
             for step in range(self.step_num):
                 if step % 2 == 0:
-                    img_path = self.player.sketch(section_res[step], step, self.truncation, self.noise_degree, iter+self.iter_count)
+                    img_path = self.player.sketch(section_res[step], step, self.truncation, self.noise_degree, iter+self.iter_count, self.output_path)
                     section_res.append(img_path)
                 else:
                     guessed = self.player.guess(section_res[step], self.noise_rate, self.noise_degree)
@@ -48,7 +49,8 @@ if __name__ == "__main__":
     noise_rate = float(input("noise rate: "))
     iteration = int(input("iteration: "))
     iter_count = int(input("iter count: "))
+    output_path = str(input("output path: "))
     step_num = 50
 
-    experiment = Experiment(truncation, noise_degree, noise_rate, step_num, iteration, iter_count)
+    experiment = Experiment(truncation, noise_degree, noise_rate, step_num, iteration, iter_count, output_path)
     experiment.conduct()
