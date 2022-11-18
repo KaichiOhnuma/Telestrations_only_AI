@@ -52,6 +52,7 @@ class Analyzer(object):
     def show_ex(self, data_path, truncation, noise_degree, idx):
         data = self.load_data(data_path, truncation, noise_degree)
         data = data[idx]
+        print(data)
 
     def make_heatmap(self, data_path):
         df = []
@@ -142,7 +143,7 @@ if __name__ == "__main__":
     data_path = "../data/20220924"
 
     analyzer = Analyzer(truncations, noise_degrees)
-    analyzer.analysis_manage(data_path)
+    # analyzer.analysis_manage(data_path)
     # analyzer.make_heatmap(data_path)
-    # analyzer.show_ex(data_path, 0.5, 1.5, 0)
+    analyzer.show_ex(data_path, 0.5, 1.5, 0)
     
