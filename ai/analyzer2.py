@@ -61,17 +61,22 @@ class Analyzer2(object):
         return final_sim
 
     def calc_min_sim(self, data):
-        min_sim = 1
+        """
+        calc avg min sim
+        """
+        min_sims = []
 
         for section_data in data:
+            min_sim = 1
             pre_wrd = section_data[0]
             for i in range(2, len(section_data), 2):
                 sim = self.calc_cos_sim(pre_wrd, section_data[i])
                 if sim < min_sim:
                     min_sim = sim
                 pre_wrd = section_data[i]
+            min_sims.append(min_sim)
 
-        return min_sim
+        return sum(min_sims) / len(min_sims)
 
 
     def calc_ratio_of_avg_sim_to_final_sim(self, data):

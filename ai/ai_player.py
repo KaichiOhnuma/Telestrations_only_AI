@@ -26,7 +26,7 @@ class AI_Player(object):
 
         assert torch.cuda.is_available()
         self.gan.to("cuda")
-        # self.classifier.to("cuda")
+        # \\self.classifier.to("cuda")
 
         self.transform = transforms.Compose([
             transforms.Resize(224),
