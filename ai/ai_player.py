@@ -16,7 +16,6 @@ class AI_Player(object):
         :param round_count: int
         """
         self.idx = idx
-        self.reliable_label = 5
         self.gan = BigGAN.from_pretrained('biggan-deep-512')
         self.classifier = models.resnet152(pretrained=True)
         self.classifier.eval()
@@ -51,11 +50,14 @@ class AI_Player(object):
         noise_vector = truncated_noise_sample(truncation=truncation, batch_size=1)
         noise_vector = torch.from_numpy(noise_vector)
 
+        if truncation > 1:
+            truncation = 1
+
         with torch.no_grad():
             output = self.gan(noise_vector, class_vector, truncation)
 
         img = convert_to_images(output)
-        img_file = f'C:/Users/onuma/Documents/research/program/Telestrations/ai/images/{self.idx}-{round_count}.png'
+        img_file = f'C:/Users/onuma/Documents/research/code/Telestrations_only_ai/ai/images/{self.idx}-{round_count}.png'
         img[0].save(img_file, quality=95)
 
         del class_vector, noise_vector, output, img
@@ -117,5 +119,5 @@ class AI_Player(object):
 # test
 if __name__ == '__main__':
     test = AI_Player(0)
-    print(test.sketch("hen", 3, 1))
+    test.sketch("hen", 0, truncation=1.5)
 
