@@ -117,5 +117,5 @@ class AI_Player(object):
 # test
 if __name__ == '__main__':
     test = AI_Player(0)
-    print(test.sketch("tennis ball", 3, 0.002))
+    print(test.sketch("hen", 3, 1))
 
