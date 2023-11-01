@@ -7,6 +7,7 @@ from torchvision import models, transforms
 import torch
 from PIL import Image
 import gc
+import os
 
 class AI_Player(object):
     def __init__(self, idx):
@@ -26,14 +27,14 @@ class AI_Player(object):
             transforms.Normalize(mean=[0.485,0.456,0.406], std=[0.229,0.224,0.225])
         ])
 
-        with open('imagenet_classes.txt') as f:
+        with open('../../ai/imagenet_classes.txt') as f:
             self.wrds = [line.strip() for line in f.readlines()]
 
-        wrd_vec_file = np.load("word_vector.npz")
+        wrd_vec_file = np.load("../../ai/word_vector.npz")
         self.unavailable_wrd_idxs = wrd_vec_file["unavailable_wrd_idxs"]
         self.wrd_vec_list = wrd_vec_file["wrd_vec_list"]
 
-    def sketch(self, wrd, round_count, truncation=1.):
+    def sketch(self, wrd, truncation, wrd_diversity, iter_count,  step_count, output_path, seed=None):
         """
         sketch from the word
         :param wrd: str
@@ -57,7 +58,8 @@ class AI_Player(object):
             output = self.gan(noise_vector, class_vector, truncation)
 
         img = convert_to_images(output)
-        img_file = f'C:/Users/onuma/Documents/research/code/Telestrations_only_ai/ai/images/{self.idx}-{round_count}.png'
+        img_file = os.path.join(output_path, f"images/{self.idx}-{truncation}-{wrd_diversity}-{iter_count}-{step_count}.png")
+        # img_file = f'C:/Users/onuma/Documents/research/code/Telestrations_only_ai/ai/images/{self.idx}-{round_count}.png'
         img[0].save(img_file, quality=95)
 
         del class_vector, noise_vector, output, img
@@ -65,7 +67,7 @@ class AI_Player(object):
 
         return img_file
 
-    def guess(self, img_file, round_count, mutation_rate, mutation_degree):
+    def guess(self, img_file, mutation_degree, mutation_rate=1):
         """
         guess the image
         :param img_file: str
