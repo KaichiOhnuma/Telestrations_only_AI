@@ -2,6 +2,7 @@ import numpy as np
 import os
 import itertools
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import seaborn as sns
 
 class Analyze_data_20231022(object):
@@ -20,6 +21,7 @@ class Analyze_data_20231022(object):
         avg_sim_of_one_step_list = []
         avg_final_sim_list = []
         ratio_of__avg_sim_of_one_step__to__avg_final_sim_list = []
+        avg_sim_trans_from_first_wrd_list = []
 
         for img_diversity in self.img_diversity_list:
             for wrd_diversity in self.wrd_diversity_list:
@@ -29,18 +31,22 @@ class Analyze_data_20231022(object):
                 avg_sim_of_one_step = self.get_avg_sim_of_one_step(data)
                 avg_final_sim = self.get_avg_final_sim(data)
                 ratio_of__avg_sim_of_one_step__to__avg_final_sim = self.get_ratio_of__avg_sim_of_one_step__to__avg_final_sim(data)
+                avg_sim_trans_from_first_wrd = self.get_avg_sim_trans_from_first_wrd(data)
+                
 
                 avg_success_rate_of_one_step_list.append(avg_success_rate_of_one_step)
                 avg_num_of_used_wrd_list.append(avg_num_of_used_wrd)
                 avg_sim_of_one_step_list.append(avg_sim_of_one_step)
                 avg_final_sim_list.append(avg_final_sim)
                 ratio_of__avg_sim_of_one_step__to__avg_final_sim_list.append(ratio_of__avg_sim_of_one_step__to__avg_final_sim)
+                avg_sim_trans_from_first_wrd_list.append(avg_sim_trans_from_first_wrd)
 
-        self.save_heatmap(avg_success_rate_of_one_step_list, os.path.join(self.data_path, "graphs", f"success_rate_of_one_step.png"))
-        self.save_heatmap(avg_num_of_used_wrd_list, os.path.join(self.data_path, "graphs", f"n_used_wrd.png"))
-        self.save_heatmap(avg_sim_of_one_step_list, os.path.join(self.data_path, "graphs", f"one_step_sim.png"))
-        self.save_heatmap(avg_final_sim_list, os.path.join(self.data_path, "graphs", f"final_sim.png"))
-        self.save_heatmap(ratio_of__avg_sim_of_one_step__to__avg_final_sim_list, os.path.join(self.data_path, "graphs", f"ratio_one_sim_to_final_sim.png"))
+        self.save_heatmap(avg_success_rate_of_one_step_list, os.path.join(self.data_path, "graphs", "success_rate_of_one_step.png"))
+        self.save_heatmap(avg_num_of_used_wrd_list, os.path.join(self.data_path, "graphs", "n_used_wrd.png"))
+        self.save_heatmap(avg_sim_of_one_step_list, os.path.join(self.data_path, "graphs", "one_step_sim.png"))
+        self.save_heatmap(avg_final_sim_list, os.path.join(self.data_path, "graphs", "final_sim.png"))
+        self.save_heatmap(ratio_of__avg_sim_of_one_step__to__avg_final_sim_list, os.path.join(self.data_path, "graphs", "ratio_one_sim_to_final_sim.png"))
+        self.save_graph_of_sim_trans_from_first_wrd(avg_sim_trans_from_first_wrd_list, os.path.join(self.data_path, "graphs", "sim_trans_from_first_wrd.png"))
 
     def save_heatmap(self, analyzed_data, output_path):
         analyzed_data = np.array(analyzed_data)
@@ -52,6 +58,23 @@ class Analyze_data_20231022(object):
         plt.ylabel("img diversity")
         plt.xticks(self.wrd_diversity_list)
         plt.yticks(self.img_diversity_list)
+        plt.savefig(output_path)
+
+    def save_graph_of_sim_trans_from_first_wrd(self, analyzed_data, output_path):
+        analyzed_data = np.array(analyzed_data)
+    
+        step = [i for i in range(analyzed_data.shape[1])]
+
+        plt.figure(figsize=(14, 8))
+        for i, d in enumerate(analyzed_data):
+            img_diversity_idx, wrd_diversity_idx = divmod(i, len(self.wrd_diversity_list))
+            img_diversity = self.img_diversity_list[img_diversity_idx]
+            wrd_diversity = self.wrd_diversity_list[wrd_diversity_idx]
+            color_id = self.get_ratio_of__avg_sim_of_one_step__to__avg_final_sim(self.load_data(img_diversity, wrd_diversity))
+            plt.plot(step, d, color=cm.jet(color_id/5.5))
+
+        plt.xlabel("step")
+        plt.ylabel("sim to first wrd")
         plt.savefig(output_path)
 
     def get_avg_sim_of_one_step(self,data):
@@ -119,6 +142,24 @@ class Analyze_data_20231022(object):
 
     def get_ratio_of__avg_sim_of_one_step__to__avg_final_sim(self, data):
         return self.get_avg_sim_of_one_step(data) / self.get_avg_final_sim(data)
+    
+    def get_avg_sim_trans_from_first_wrd(self, data):
+        iteration = len(data)
+        step_num = len(data[0])
+
+        avg_sim_trans_from_first_wrd = [0 for _ in range(step_num//2+1)]
+
+        for one_play_data in data:
+            first_wrd = one_play_data[0]
+            avg_sim_trans_from_first_wrd[0] = 1 * iteration
+            for i in range(2, step_num, 2):
+                sim_from_first_wrd = self.calc_cos_sim(first_wrd, one_play_data[i])
+                avg_sim_trans_from_first_wrd[int(i/2)] += sim_from_first_wrd
+
+        avg_sim_trans_from_first_wrd = [sum_sim/iteration for sum_sim in avg_sim_trans_from_first_wrd]
+
+        return avg_sim_trans_from_first_wrd
+
 
     def load_data(self, img_diversity, wrd_diversity):
         data = os.path.join(self.data_path, f"{img_diversity}-{wrd_diversity}.npy")
