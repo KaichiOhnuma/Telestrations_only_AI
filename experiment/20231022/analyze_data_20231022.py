@@ -36,13 +36,13 @@ class Analyze_data_20231022(object):
                 avg_final_sim_list.append(avg_final_sim)
                 ratio_of__avg_sim_of_one_step__to__avg_final_sim_list.append(ratio_of__avg_sim_of_one_step__to__avg_final_sim)
 
-            self.save_heatmap(avg_success_rate_of_one_step_list)
-            self.save_heatmap(avg_num_of_used_wrd_list)
-            self.save_heatmap(avg_sim_of_one_step_list)
-            self.save_heatmap(avg_final_sim_list)
-            self.save_heatmap(ratio_of__avg_sim_of_one_step__to__avg_final_sim_list)
+        self.save_heatmap(avg_success_rate_of_one_step_list, os.path.join(self.data_path, "graphs", f"success_rate_of_one_step.png"))
+        self.save_heatmap(avg_num_of_used_wrd_list, os.path.join(self.data_path, "graphs", f"n_used_wrd.png"))
+        self.save_heatmap(avg_sim_of_one_step_list, os.path.join(self.data_path, "graphs", f"one_step_sim.png"))
+        self.save_heatmap(avg_final_sim_list, os.path.join(self.data_path, "graphs", f"final_sim.png"))
+        self.save_heatmap(ratio_of__avg_sim_of_one_step__to__avg_final_sim_list, os.path.join(self.data_path, "graphs", f"ratio_one_sim_to_final_sim.png"))
 
-    def save_heatmap(self, analyzed_data):
+    def save_heatmap(self, analyzed_data, output_path):
         analyzed_data = np.array(analyzed_data)
         analyzed_data = analyzed_data.reshape(len(self.img_diversity_list), len(self.wrd_diversity_list))
         
@@ -52,7 +52,7 @@ class Analyze_data_20231022(object):
         plt.ylabel("img diversity")
         plt.xticks(self.wrd_diversity_list)
         plt.yticks(self.img_diversity_list)
-        plt.show()
+        plt.savefig(output_path)
 
     def get_avg_sim_of_one_step(self,data):
         iteration = len(data)
