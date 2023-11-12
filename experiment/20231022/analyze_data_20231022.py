@@ -6,6 +6,10 @@ import matplotlib.cm as cm
 import seaborn as sns
 import umap
 import umap.plot
+import nltk
+from nltk.corpus import wordnet as wn
+nltk.download("wordnet")
+
 
 class Analyze_data_20231022(object):
     def __init__(self, data_path, img_diversity_list, wrd_diversity_list):
@@ -24,6 +28,8 @@ class Analyze_data_20231022(object):
         avg_final_sim_list = []
         ratio_of__avg_sim_of_one_step__to__avg_final_sim_list = []
         avg_sim_trans_from_first_wrd_list = []
+        correlation_of_sim_and_synsets_num_list = []
+        correlation_of_sim_and_synset_deepness_list = []
 
         for img_diversity in self.img_diversity_list:
             for wrd_diversity in self.wrd_diversity_list:
@@ -34,8 +40,11 @@ class Analyze_data_20231022(object):
                 avg_final_sim = self.get_avg_final_sim(data)
                 ratio_of__avg_sim_of_one_step__to__avg_final_sim = self.get_ratio_of__avg_sim_of_one_step__to__avg_final_sim(data)
                 avg_sim_trans_from_first_wrd = self.get_avg_sim_trans_from_first_wrd(data)
+                correlation_of_sim_and_synsets_num = self.get_correlation_of_sim_and_synsets_num(data)
+                correlation_of_sim_and_synset_deepness = self.get_correlation_of_sim_and_synset_deepness(data)
                 
-                self.save_umap(data)
+                # self.save_umap(data)
+                self.save_scatter_of_sim_and_abstraction_level(data, os.path.join(self.data_path, "graphs", "scatter" ,f"{img_diversity}-{wrd_diversity}"))
 
                 avg_success_rate_of_one_step_list.append(avg_success_rate_of_one_step)
                 avg_num_of_used_wrd_list.append(avg_num_of_used_wrd)
@@ -43,12 +52,16 @@ class Analyze_data_20231022(object):
                 avg_final_sim_list.append(avg_final_sim)
                 ratio_of__avg_sim_of_one_step__to__avg_final_sim_list.append(ratio_of__avg_sim_of_one_step__to__avg_final_sim)
                 avg_sim_trans_from_first_wrd_list.append(avg_sim_trans_from_first_wrd)
+                correlation_of_sim_and_synsets_num_list.append(correlation_of_sim_and_synsets_num)
+                correlation_of_sim_and_synset_deepness_list.append(correlation_of_sim_and_synset_deepness)
 
         self.save_heatmap(avg_success_rate_of_one_step_list, os.path.join(self.data_path, "graphs", "success_rate_of_one_step.png"))
         self.save_heatmap(avg_num_of_used_wrd_list, os.path.join(self.data_path, "graphs", "n_used_wrd.png"))
         self.save_heatmap(avg_sim_of_one_step_list, os.path.join(self.data_path, "graphs", "one_step_sim.png"))
         self.save_heatmap(avg_final_sim_list, os.path.join(self.data_path, "graphs", "final_sim.png"))
         self.save_heatmap(ratio_of__avg_sim_of_one_step__to__avg_final_sim_list, os.path.join(self.data_path, "graphs", "ratio_one_sim_to_final_sim.png"))
+        self.save_heatmap(correlation_of_sim_and_synsets_num_list, os.path.join(self.data_path, "graphs", "correlation_of_sim_and_synsets_num.png"))
+        self.save_heatmap(correlation_of_sim_and_synset_deepness_list, os.path.join(self.data_path, "graphs", "correlation_of_sim_and_synset_deepness.png"))
         self.save_graph_of_sim_trans_from_first_wrd(avg_sim_trans_from_first_wrd_list, os.path.join(self.data_path, "graphs", "sim_trans_from_first_wrd.png"))
 
     def save_heatmap(self, analyzed_data, output_path):
@@ -62,6 +75,8 @@ class Analyze_data_20231022(object):
         plt.xticks(self.wrd_diversity_list)
         plt.yticks(self.img_diversity_list)
         plt.savefig(output_path)
+        plt.clf()
+        plt.close()
 
     def save_graph_of_sim_trans_from_first_wrd(self, analyzed_data, output_path):
         analyzed_data = np.array(analyzed_data)
@@ -79,6 +94,8 @@ class Analyze_data_20231022(object):
         plt.xlabel("step")
         plt.ylabel("sim to first wrd")
         plt.savefig(output_path)
+        plt.clf()
+        plt.close()
 
     # TODO
     def save_umap(self, data):
@@ -94,7 +111,107 @@ class Analyze_data_20231022(object):
             umap.plot.show(p)
             exit()
 
-    def get_avg_sim_of_one_step(self,data):
+    def save_scatter_of_sim_and_abstraction_level(self, data, output_path):        
+        step_num = len(data[0])
+
+        one_step_sim_list = []
+        synsets_num_list = []
+        synset_deepness_list = []
+
+        for one_play_data in data:
+            pre_wrd = one_play_data[0]
+            for i in range(2, step_num, 2):
+                sim = self.calc_cos_sim(pre_wrd, one_play_data[i])
+
+                if self.get_synsets_num(one_play_data[i]) != 0:
+                    one_step_sim_list.append(sim)
+                    synsets_num_list.append(self.get_synsets_num(one_play_data[i]))
+                    synset_deepness_list.append(self.get_synset_deepness(one_play_data[i]))
+
+                pre_wrd = one_play_data[i]
+        
+        plt.figure(figsize=(14,8))
+        plt.scatter(synsets_num_list, one_step_sim_list)
+        plt.xlabel("synsets num")
+        plt.ylabel("sim of one step")
+        correlation = np.corrcoef(np.array(synsets_num_list), np.array(one_step_sim_list))[0][1]
+        plt.title(f"correlation: {correlation}")
+        plt.savefig(output_path+"-scatter_of_synsets_num_and_sim.png")
+        plt.clf()
+        plt.close()
+        
+        plt.figure(figsize=(14,8))
+        plt.scatter(synset_deepness_list, one_step_sim_list)
+        plt.xlabel("wrd synset deepness")
+        plt.ylabel("sim of one step")
+        correlation = np.corrcoef(np.array(synset_deepness_list), np.array(one_step_sim_list))[0][1]
+        plt.title(f"correlation: {correlation}")
+        plt.savefig(output_path+"-scatter_of_synset_deepness_and_sim.png")
+        plt.clf()
+        plt.close()
+
+    def get_correlation_of_sim_and_synset_deepness(self, data):
+        step_num = len(data[0])
+
+        one_step_sim_list = []
+        synset_deepness_list = []
+
+        for one_play_data in data:
+            pre_wrd = one_play_data[0]
+            for i in range(2, step_num, 2):
+                sim = self.calc_cos_sim(pre_wrd, one_play_data[i])
+
+                if self.get_synsets_num(one_play_data[i]) != 0:
+                    one_step_sim_list.append(sim)
+                    synset_deepness_list.append(self.get_synset_deepness(one_play_data[i]))
+
+                pre_wrd = one_play_data[i]
+
+        correlation = np.corrcoef(np.array(synset_deepness_list), np.array(one_step_sim_list))[0][1]
+        return correlation
+    
+    def get_correlation_of_sim_and_synsets_num(self, data):
+        step_num = len(data[0])
+
+        one_step_sim_list = []
+        synsets_num_list = []
+
+        for one_play_data in data:
+            pre_wrd = one_play_data[0]
+            for i in range(2, step_num, 2):
+                sim = self.calc_cos_sim(pre_wrd, one_play_data[i])
+
+                if self.get_synsets_num(one_play_data[i]) != 0:
+                    one_step_sim_list.append(sim)
+                    synsets_num_list.append(self.get_synsets_num(one_play_data[i]))
+
+                pre_wrd = one_play_data[i]
+
+        correlation = np.corrcoef(np.array(synsets_num_list), np.array(one_step_sim_list))[0][1]
+        return correlation
+
+    def get_synsets_num(self, wrd):
+        return len(wn.synsets(wrd, pos=wn.NOUN))
+
+    def get_synset_deepness(self,wrd):
+        if len(wn.synsets(wrd)) == 0:
+            return 0
+        
+        wrd_synset = wn.synsets(wrd)[0]
+
+        count = 0
+        while True:
+            new_wrd_synsets = wrd_synset.hypernyms()
+
+            if len(new_wrd_synsets) == 0:
+                break
+
+            wrd_synset = new_wrd_synsets[0]
+            count += 1
+
+        return count
+
+    def get_avg_sim_of_one_step(self, data):
         iteration = len(data)
         step_num = len(data[0])
 
@@ -111,7 +228,7 @@ class Analyze_data_20231022(object):
 
         return avg_sim
 
-    def get_avg_final_sim(self,data):
+    def get_avg_final_sim(self, data):
         iteration = len(data)
         avg_final_sim = 0
 
