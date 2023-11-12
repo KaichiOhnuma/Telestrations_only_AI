@@ -4,6 +4,8 @@ import itertools
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import seaborn as sns
+import umap
+import umap.plot
 
 class Analyze_data_20231022(object):
     def __init__(self, data_path, img_diversity_list, wrd_diversity_list):
@@ -33,6 +35,7 @@ class Analyze_data_20231022(object):
                 ratio_of__avg_sim_of_one_step__to__avg_final_sim = self.get_ratio_of__avg_sim_of_one_step__to__avg_final_sim(data)
                 avg_sim_trans_from_first_wrd = self.get_avg_sim_trans_from_first_wrd(data)
                 
+                self.save_umap(data)
 
                 avg_success_rate_of_one_step_list.append(avg_success_rate_of_one_step)
                 avg_num_of_used_wrd_list.append(avg_num_of_used_wrd)
@@ -76,6 +79,20 @@ class Analyze_data_20231022(object):
         plt.xlabel("step")
         plt.ylabel("sim to first wrd")
         plt.savefig(output_path)
+
+    # TODO
+    def save_umap(self, data):
+        step_num = len(data[0])
+
+        for one_play_data in data:
+            vector_data = []
+            for i in range(2, step_num, 2):
+                vector_data.append(self.wrd_vec_data[one_play_data[i]])
+            print(vector_data)
+            map = umap.UMAP(n_neighbors=4, n_components=2, min_dist=0.3, metric='cosine').fit(vector_data)
+            p = umap.plot.points(map)
+            umap.plot.show(p)
+            exit()
 
     def get_avg_sim_of_one_step(self,data):
         iteration = len(data)
