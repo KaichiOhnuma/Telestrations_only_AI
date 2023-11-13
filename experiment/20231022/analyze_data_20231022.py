@@ -13,7 +13,6 @@ nltk.download("wordnet")
 from sentence_transformers import SentenceTransformer
 import umap
 
-
 class Analyze_data_20231022(object):
     def __init__(self, data_path, img_diversity_list, wrd_diversity_list):
         self.data_path = data_path
