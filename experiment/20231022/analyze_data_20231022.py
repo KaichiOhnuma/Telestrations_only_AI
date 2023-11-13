@@ -10,6 +10,9 @@ import nltk
 from nltk.corpus import wordnet as wn
 nltk.download("wordnet")
 
+from sentence_transformers import SentenceTransformer
+import umap
+
 
 class Analyze_data_20231022(object):
     def __init__(self, data_path, img_diversity_list, wrd_diversity_list):
@@ -18,6 +21,7 @@ class Analyze_data_20231022(object):
         self.wrd_diversity_list = wrd_diversity_list
 
         self.wrd_vec_data = self.load_wrd_vec_data()
+        self.wrd_vec_model = SentenceTransformer("stsb-xlm-r-multilingual")
 
         self.main()
 
@@ -43,7 +47,7 @@ class Analyze_data_20231022(object):
                 correlation_of_sim_and_synsets_num = self.get_correlation_of_sim_and_synsets_num(data)
                 correlation_of_sim_and_synset_deepness = self.get_correlation_of_sim_and_synset_deepness(data)
                 
-                # self.save_umap(data)
+                self.save_umap(data, os.path.join(self.data_path, "graphs", "umap", f"{img_diversity}-{wrd_diversity}"))
                 self.save_scatter_of_sim_and_abstraction_level(data, os.path.join(self.data_path, "graphs", "scatter" ,f"{img_diversity}-{wrd_diversity}"))
 
                 avg_success_rate_of_one_step_list.append(avg_success_rate_of_one_step)
@@ -97,19 +101,29 @@ class Analyze_data_20231022(object):
         plt.clf()
         plt.close()
 
-    # TODO
-    def save_umap(self, data):
+    def save_umap(self, data, output_path):
         step_num = len(data[0])
 
-        for one_play_data in data:
-            vector_data = []
-            for i in range(2, step_num, 2):
-                vector_data.append(self.wrd_vec_data[one_play_data[i]])
-            print(vector_data)
-            map = umap.UMAP(n_neighbors=4, n_components=2, min_dist=0.3, metric='cosine').fit(vector_data)
-            p = umap.plot.points(map)
-            umap.plot.show(p)
-            exit()
+        wrd_trans = []
+        wrd_vec_trans = []
+
+        for i, one_play_data in enumerate(data):
+            wrd_trans = [one_play_data[i].split(",")[0] for i in range(0, step_num, 2)]
+            wrd_vec_trans = [self.wrd_vec_model.encode(wrd, convert_to_tensor=True).numpy() for wrd in wrd_trans]
+
+            coords = umap.UMAP(n_neighbors=4, n_components=2, min_dist=0.3, metric='cosine', random_state=10).fit_transform(wrd_vec_trans)
+
+            fig, ax = plt.subplots()
+            x = [vector[0] for vector in coords]
+            y = [vector[1] for vector in coords]
+            ax.scatter(x[0], y[0], c="red")
+            ax.scatter(x, y, c="blue")
+            ax.plot(x, y, c="gray", linewidth=0.3)
+            for j, wrd in enumerate(wrd_trans):
+                ax.annotate(wrd, (coords[j][0], coords[j][1]), fontsize=10)
+            plt.savefig(output_path + f"-{i}.png")
+            plt.clf()
+            plt.close()
 
     def save_scatter_of_sim_and_abstraction_level(self, data, output_path):        
         step_num = len(data[0])
