@@ -12,6 +12,7 @@ nltk.download("wordnet")
 
 from sentence_transformers import SentenceTransformer
 import umap
+import pandas as pd
 
 class Analyze_data_20231022(object):
     def __init__(self, data_path, img_diversity_list, wrd_diversity_list):
@@ -46,8 +47,8 @@ class Analyze_data_20231022(object):
                 correlation_of_sim_and_synsets_num = self.get_correlation_of_sim_and_synsets_num(data)
                 correlation_of_sim_and_synset_deepness = self.get_correlation_of_sim_and_synset_deepness(data)
                 
-                self.save_umap(data, os.path.join(self.data_path, "graphs", "umap", f"{img_diversity}-{wrd_diversity}"))
-                self.save_scatter_of_sim_and_abstraction_level(data, os.path.join(self.data_path, "graphs", "scatter" ,f"{img_diversity}-{wrd_diversity}"))
+                # self.save_umap(data, os.path.join(self.data_path, "graphs", "umap", f"{img_diversity}-{wrd_diversity}"))
+                # self.save_scatter_of_sim_and_abstraction_level(data, os.path.join(self.data_path, "graphs", "scatter" ,f"{img_diversity}-{wrd_diversity}"))
 
                 avg_success_rate_of_one_step_list.append(avg_success_rate_of_one_step)
                 avg_num_of_used_wrd_list.append(avg_num_of_used_wrd)
@@ -69,14 +70,21 @@ class Analyze_data_20231022(object):
 
     def save_heatmap(self, analyzed_data, output_path):
         analyzed_data = np.array(analyzed_data)
-        analyzed_data = analyzed_data.reshape(len(self.img_diversity_list), len(self.wrd_diversity_list))
-        
+
+        data_frame = []
+
+        for i, data in enumerate(analyzed_data):
+            img_diversity = self.img_diversity_list[i//len(self.wrd_diversity_list)]
+            wrd_diversity = self.wrd_diversity_list[i%len(self.wrd_diversity_list)]
+            data_frame.append([img_diversity, wrd_diversity, data])
+
+        data_frame = pd.DataFrame(data_frame, columns=["img diversity", "wrd diversity", "target data"])
+        data_frame = data_frame.pivot("img diversity", "wrd diversity", "target data")
+
         plt.figure(figsize=(14,8))
-        heatmap = sns.heatmap(analyzed_data, annot=True, cmap="rainbow", fmt="1.2f")
+        heatmap = sns.heatmap(data_frame, annot=True, cmap="rainbow", fmt="1.2f")
         plt.xlabel("wrd diversity")
         plt.ylabel("img diversity")
-        plt.xticks(self.wrd_diversity_list)
-        plt.yticks(self.img_diversity_list)
         plt.savefig(output_path)
         plt.clf()
         plt.close()

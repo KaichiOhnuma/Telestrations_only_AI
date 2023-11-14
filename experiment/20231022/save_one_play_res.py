@@ -50,5 +50,5 @@ def save_one_play_result(data_path, img_diversity, wrd_diversity, set_count):
 
 if __name__ == "__main__":
     data_path = "./data"
-    img_diversity, wrd_diversity, set_count = 0.04, 0, 2
+    img_diversity, wrd_diversity, set_count = 0.75, 1.25, 10
     save_one_play_result(data_path, img_diversity, wrd_diversity, set_count)
