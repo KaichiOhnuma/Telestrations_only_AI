@@ -83,8 +83,8 @@ class Analyze_data_20231022(object):
 
         plt.figure(figsize=(14,8))
         heatmap = sns.heatmap(data_frame, annot=True, cmap="rainbow", fmt="1.2f")
-        plt.xlabel("wrd diversity")
-        plt.ylabel("img diversity")
+        plt.xlabel("wrd diversity", fontsize=20)
+        plt.ylabel("img diversity", fontsize=20)
         plt.savefig(output_path)
         plt.clf()
         plt.close()
@@ -102,8 +102,8 @@ class Analyze_data_20231022(object):
             color_id = self.get_ratio_of__avg_sim_of_one_step__to__avg_final_sim(self.load_data(img_diversity, wrd_diversity))
             plt.plot(step, d, color=cm.jet(color_id/5.5))
 
-        plt.xlabel("step")
-        plt.ylabel("sim to first wrd")
+        plt.xlabel("step", fontsize=20)
+        plt.ylabel("sim to first wrd", fontsize=20)
         plt.savefig(output_path)
         plt.clf()
         plt.close()
